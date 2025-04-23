@@ -87,7 +87,7 @@
   <div class="container" id="giftList">Cargando regalitos...</div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxlL6zvMpR3T6_bWPh-YyIRlJ6xLJKVSJRv-LAwSLJLYMFDwNUUYS3iBh1nSuzsiWVGFw/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxExNq2ItSZBZ0tKYdoNlp3KQzyJ6ZQCoPt6mcNsTEdkYZQk68hIx9nLJmxz6AsanlHrA/exec';
 
     async function cargarRegalos() {
       try {
@@ -120,18 +120,19 @@
     }
 
     async function elegirRegalo(id) {
-      const nombreInvitado = prompt("Escribe tu nombre o familia para reservar el regalo:");
-      if (!nombreInvitado) return;
+  const nombreInvitado = prompt("Escribe tu nombre o familia para reservar el regalo:");
+  if (!nombreInvitado) return;
 
-      await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ id: id }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+  await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ id: id, nombre: nombreInvitado }),
+    headers: { 'Content-Type': 'application/json' }
+  });
 
-      alert("¡Gracias " + nombreInvitado + "! Hemos reservado tu regalito 🎁");
-      cargarRegalos();
-    }
+  alert("¡Gracias " + nombreInvitado + "! Hemos reservado tu regalito 🎁");
+  cargarRegalos();
+}
+
 
     cargarRegalos();
   </script>
