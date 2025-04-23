@@ -89,16 +89,18 @@
 <body>
 
   <h1>🎁 Lista de Regalitos para el Baby Shower</h1>
-  <p>Elige un regalo disponible y déjanos tu nombre para reservarlo. ¡Gracias por acompañarnos en este momento especial! 💖</p>
+  <p>Elige un regalo disponible y déjanos tu nombre para reservarlo. 💖</p>
   <div class="container" id="giftList">Cargando regalitos...</div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbz6GhmQRhTCV_AO-cei2lCBzXjeonI9n7749299loWbJGoUBWBXRwcUGXFCF59jpYA2EQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycby-9pslrp4jCUSg_N1gCf1n1NpS3hbrYSOsZTPwWduELawaWC8DiRMW9tT0ttRvbsCYlw/exec';
 
     async function cargarRegalos() {
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
+
+        console.log("✅ Datos recibidos de la API:", data);
 
         const giftList = document.getElementById('giftList');
         giftList.innerHTML = '';
@@ -121,6 +123,7 @@
           giftList.appendChild(card);
         });
       } catch (error) {
+        console.error("❌ Error al conectar con la API (GET):", error);
         document.getElementById('giftList').innerHTML = 'Error al cargar la lista. 😢';
       }
     }
@@ -129,16 +132,25 @@
       const nombreInvitado = prompt("Escribe tu nombre o familia para reservar el regalo:");
       if (!nombreInvitado) return;
 
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ id: id, nombre: nombreInvitado }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const datos = { id: id, nombre: nombreInvitado };
+      console.log("📤 Enviando datos al API:", datos);
 
-      const mensaje = await response.text();
-      alert(`✅ ${mensaje} - Gracias ${nombreInvitado} 🎉`);
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(datos),
+          headers: { 'Content-Type': 'application/json' }
+        });
 
-      cargarRegalos();
+        const mensaje = await response.text();
+        console.log("📥 Respuesta del API:", mensaje);
+
+        alert(`✅ ${mensaje} - Gracias ${nombreInvitado} 🎉`);
+        cargarRegalos();
+      } catch (error) {
+        console.error("❌ Error al enviar datos al API (POST):", error);
+        alert("Hubo un problema al reservar el regalo. Intenta de nuevo.");
+      }
     }
 
     cargarRegalos();
