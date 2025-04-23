@@ -16,6 +16,11 @@
 
     h1 {
       color: #ff6f91;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #666;
       margin-bottom: 30px;
     }
 
@@ -84,10 +89,11 @@
 <body>
 
   <h1>🎁 Lista de Regalitos para el Baby Shower</h1>
+  <p>Elige un regalo disponible y déjanos tu nombre para reservarlo. ¡Gracias por acompañarnos en este momento especial! 💖</p>
   <div class="container" id="giftList">Cargando regalitos...</div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxExNq2ItSZBZ0tKYdoNlp3KQzyJ6ZQCoPt6mcNsTEdkYZQk68hIx9nLJmxz6AsanlHrA/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbz6GhmQRhTCV_AO-cei2lCBzXjeonI9n7749299loWbJGoUBWBXRwcUGXFCF59jpYA2EQ/exec';
 
     async function cargarRegalos() {
       try {
@@ -120,19 +126,20 @@
     }
 
     async function elegirRegalo(id) {
-  const nombreInvitado = prompt("Escribe tu nombre o familia para reservar el regalo:");
-  if (!nombreInvitado) return;
+      const nombreInvitado = prompt("Escribe tu nombre o familia para reservar el regalo:");
+      if (!nombreInvitado) return;
 
-  await fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ id: id, nombre: nombreInvitado }),
-    headers: { 'Content-Type': 'application/json' }
-  });
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ id: id, nombre: nombreInvitado }),
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-  alert("¡Gracias " + nombreInvitado + "! Hemos reservado tu regalito 🎁");
-  cargarRegalos();
-}
+      const mensaje = await response.text();
+      alert(`✅ ${mensaje} - Gracias ${nombreInvitado} 🎉`);
 
+      cargarRegalos();
+    }
 
     cargarRegalos();
   </script>
