@@ -30,7 +30,7 @@
       background: #fff;
       border-radius: 15px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      width: 200px;
+      width: 220px;
       padding: 20px;
       transition: transform 0.2s;
       position: relative;
@@ -84,39 +84,43 @@
 <body>
 
   <h1>🎁 Lista de Regalitos para el Baby Shower</h1>
-  <div class="container" id="giftList"></div>
+  <div class="container" id="giftList">Cargando regalitos...</div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxlL6zvMpR3T6_bWPh-YyIRlJ6xLJKVSJRv-LAwSLJLYMFDwNUUYS3iBh1nSuzsiWVGFw/exec';  // Reemplaza esto con tu URL de Apps Script
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxlL6zvMpR3T6_bWPh-YyIRlJ6xLJKVSJRv-LAwSLJLYMFDwNUUYS3iBh1nSuzsiWVGFw/exec';
 
     async function cargarRegalos() {
-      const res = await fetch(API_URL);
-      const data = await res.json();
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
 
-      const giftList = document.getElementById('giftList');
-      giftList.innerHTML = '';
+        const giftList = document.getElementById('giftList');
+        giftList.innerHTML = '';
 
-      data.slice(1).forEach(regalo => {
-        const [id, nombre, cantidad, disponible] = regalo;
+        data.slice(1).forEach(regalo => {
+          const [id, nombre, cantidad, disponible] = regalo;
 
-        const card = document.createElement('div');
-        card.className = 'card';
-        if (disponible !== "Sí") card.classList.add('no-disponible');
+          const card = document.createElement('div');
+          card.className = 'card';
+          if (disponible !== "Sí") card.classList.add('no-disponible');
 
-        card.innerHTML = `
-          <h3>${nombre}</h3>
-          <div class="cantidad">Quedan: ${cantidad}</div>
-          ${disponible === "Sí" 
-            ? `<button class="btn" onclick="elegirRegalo(${id})">¡Lo quiero!</button>` 
-            : `<div class="etiqueta">No disponible</div>`
-          }
-        `;
-        giftList.appendChild(card);
-      });
+          card.innerHTML = `
+            <h3>${nombre}</h3>
+            <div class="cantidad">Quedan: ${cantidad}</div>
+            ${disponible === "Sí" 
+              ? `<button class="btn" onclick="elegirRegalo(${id})">¡Lo quiero!</button>` 
+              : `<div class="etiqueta">No disponible</div>`
+            }
+          `;
+          giftList.appendChild(card);
+        });
+      } catch (error) {
+        document.getElementById('giftList').innerHTML = 'Error al cargar la lista. 😢';
+      }
     }
 
     async function elegirRegalo(id) {
-      const nombreInvitado = prompt("Escribe tu nombre o familia:");
+      const nombreInvitado = prompt("Escribe tu nombre o familia para reservar el regalo:");
       if (!nombreInvitado) return;
 
       await fetch(API_URL, {
