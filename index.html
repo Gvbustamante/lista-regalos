@@ -58,6 +58,15 @@
       let nuevaCantidad = cantidadActual - 1;
       let disponible = nuevaCantidad > 0;
 
+      console.log("Intentando conectar a Supabase...");
+fetch(API_URL, { headers })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Datos recibidos:", data);
+    ...
+  })
+
+
       fetch(`${API_URL}?id=eq.${id}`, {
         method: 'PATCH',
         headers: headers,
