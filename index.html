@@ -30,9 +30,11 @@
     };
 
     // Cargar regalos
+    console.log("Conectando a Supabase...");
     fetch(API_URL, { headers })
       .then(res => res.json())
       .then(data => {
+        console.log("Regalos cargados:", data);
         const container = document.getElementById('giftList');
         container.innerHTML = '';
 
@@ -48,6 +50,10 @@
           `;
           container.appendChild(card);
         });
+      })
+      .catch(err => {
+        console.error("Error al conectar con Supabase:", err);
+        document.getElementById('giftList').innerHTML = 'No se pudo cargar la lista 😢';
       });
 
     // Función para reservar regalo
@@ -57,15 +63,6 @@
 
       let nuevaCantidad = cantidadActual - 1;
       let disponible = nuevaCantidad > 0;
-
-      console.log("Intentando conectar a Supabase...");
-fetch(API_URL, { headers })
-  .then(res => res.json())
-  .then(data => {
-    console.log("Datos recibidos:", data);
-    ...
-  })
-
 
       fetch(`${API_URL}?id=eq.${id}`, {
         method: 'PATCH',
