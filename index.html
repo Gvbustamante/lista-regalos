@@ -5,18 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lista de Regalos Baby Shower</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; text-align: center; }
-    h1 { color: #ff6f91; }
-    .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px; }
-    .card { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 200px; padding: 15px; }
-    .btn { background: #ff6f91; color: #fff; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-    .no-disponible { opacity: 0.4; }
+    body { 
+      font-family: 'Arial', sans-serif; 
+      background: linear-gradient(135deg, #ffe0ec, #e0f7fa); 
+      text-align: center; 
+      margin: 0; 
+      padding: 20px;
+    }
+    h1 { color: #ff4f81; margin-bottom: 5px; }
+    p { color: #555; margin-top: 0; }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 160px;
+      padding: 15px;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .btn {
+      background-color: #ff4f81;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #e43e6f;
+    }
+
+    .no-disponible {
+      opacity: 0.5;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        width: 90%;
+      }
+    }
   </style>
 </head>
 <body>
 
   <h1>🎁 Lista de Regalitos</h1>
-  <p>Elige tu regalo y déjanos tu nombre 💖</p>
+  <p>Elige tu regalo disponible y deja tu nombre 💖</p>
   <div class="container" id="giftList">Cargando...</div>
 
   <script>
@@ -27,35 +76,38 @@
     const headers = {
       apikey: API_KEY,
       Authorization: `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation'
     };
 
     // Cargar regalos
     fetch(API_URL, { headers })
       .then(res => res.json())
-      .then(data => {
-        const container = document.getElementById('giftList');
-        container.innerHTML = '';
-
-        data.forEach(regalo => {
-          const card = document.createElement('div');
-          card.className = 'card';
-          if (!regalo.disponible) card.classList.add('no-disponible');
-
-          card.innerHTML = `
-            <h3>${regalo.nombre}</h3>
-            <p>Quedan: ${regalo.cantidad}</p>
-            ${regalo.disponible ? `<button class="btn" onclick="reservar(${regalo.id}, ${regalo.cantidad})">¡Lo quiero!</button>` : `<p>No disponible</p>`}
-          `;
-          container.appendChild(card);
-        });
-      })
+      .then(data => mostrarRegalos(data))
       .catch(err => {
         console.error("Error al conectar con Supabase:", err);
         document.getElementById('giftList').innerHTML = 'No se pudo cargar la lista 😢';
       });
 
-    // Función para reservar regalo y registrar invitado
+    function mostrarRegalos(regalos) {
+      const container = document.getElementById('giftList');
+      container.innerHTML = '';
+
+      regalos.forEach(regalo => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.id = `regalo-${regalo.id}`;
+        if (!regalo.disponible) card.classList.add('no-disponible');
+
+        card.innerHTML = `
+          <h3>${regalo.nombre}</h3>
+          <p>Quedan: <span id="cantidad-${regalo.id}">${regalo.cantidad}</span></p>
+          ${regalo.disponible ? `<button class="btn" onclick="reservar(${regalo.id}, ${regalo.cantidad})">¡Lo quiero!</button>` : `<p>No disponible</p>`}
+        `;
+        container.appendChild(card);
+      });
+    }
+
     function reservar(id, cantidadActual) {
       const nombre = prompt("Escribe tu nombre para reservar:");
       if (!nombre) return;
@@ -63,37 +115,36 @@
       let nuevaCantidad = cantidadActual - 1;
       let disponible = nuevaCantidad > 0;
 
-      // 1️⃣ Actualizar cantidad en la tabla regalos
       fetch(`${API_URL}?id=eq.${id}`, {
         method: 'PATCH',
         headers: headers,
         body: JSON.stringify({ cantidad: nuevaCantidad, disponible: disponible })
       })
-      .then(res => {
-        if(res.ok) {
-          // 2️⃣ Registrar al invitado en la tabla reservas
-          return fetch(RESERVAS_URL, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify({
-              invitado: nombre,
-              regalo_id: id
-            })
+      .then(res => res.json())
+      .then(() => {
+        return fetch(RESERVAS_URL, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            invitado: nombre,
+            regalo_id: id
           });
-        } else {
-          throw new Error("Error al actualizar el regalo.");
-        }
+        });
       })
-      .then(res2 => {
-        if(res2.ok) {
-          alert("¡Gracias " + nombre + "! Tu regalo ha sido reservado 🎉");
-          location.reload();
-        } else {
-          alert("Error al registrar tu nombre. Contacta con el organizador.");
+      .then(() => {
+        document.getElementById(`cantidad-${id}`).innerText = nuevaCantidad;
+        const card = document.getElementById(`regalo-${id}`);
+        if (!disponible) {
+          card.classList.add('no-disponible');
+          card.querySelector('.btn').remove();
+          const p = document.createElement('p');
+          p.innerText = 'No disponible';
+          card.appendChild(p);
         }
+        alert("¡Gracias " + nombre + "! Tu regalo ha sido reservado 🎉");
       })
       .catch(err => {
-        console.error(err);
+        console.error("Error en la reserva:", err);
         alert("Hubo un problema al procesar tu reserva.");
       });
     }
