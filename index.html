@@ -122,15 +122,16 @@
       })
       .then(res => res.json())
       .then(() => {
-        return fetch(RESERVAS_URL, {
-          method: 'POST',
-          headers: headers,
-          body: JSON.stringify({
-            invitado: nombre,
-            regalo_id: id
-          });
-        });
-      })
+  return fetch(RESERVAS_URL, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify({
+      invitado: nombre,
+      regalo_id: id
+    })   <!-- AQUÍ ESTÁ LA CORRECCIÓN -->
+  });
+})
+
       .then(() => {
         document.getElementById(`cantidad-${id}`).innerText = nuevaCantidad;
         const card = document.getElementById(`regalo-${id}`);
