@@ -76,8 +76,7 @@
     const headers = {
       apikey: API_KEY,
       Authorization: `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json',
-      Prefer: 'return=representation'
+      'Content-Type': 'application/json'
     };
 
     // Cargar regalos
@@ -115,29 +114,34 @@
       let nuevaCantidad = cantidadActual - 1;
       let disponible = nuevaCantidad > 0;
 
+      // PATCH para actualizar cantidad y disponibilidad
       fetch(`${API_URL}?id=eq.${id}`, {
         method: 'PATCH',
-        headers: headers,
+        headers: {
+          ...headers,
+          Prefer: 'return=representation'
+        },
         body: JSON.stringify({ cantidad: nuevaCantidad, disponible: disponible })
       })
       .then(res => res.json())
       .then(() => {
-  return fetch(RESERVAS_URL, {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify({
-      invitado: nombre,
-      regalo_id: id
-    })   <!-- AQUÍ ESTÁ LA CORRECCIÓN -->
-  });
-})
-
+        // POST para registrar al invitado
+        return fetch(RESERVAS_URL, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            invitado: nombre,
+            regalo_id: id
+          })
+        });
+      })
       .then(() => {
         document.getElementById(`cantidad-${id}`).innerText = nuevaCantidad;
         const card = document.getElementById(`regalo-${id}`);
         if (!disponible) {
           card.classList.add('no-disponible');
-          card.querySelector('.btn').remove();
+          const btn = card.querySelector('.btn');
+          if (btn) btn.remove();
           const p = document.createElement('p');
           p.innerText = 'No disponible';
           card.appendChild(p);
