@@ -102,7 +102,7 @@ Elige con libertad y deja tu nombrecito 🌸</p>
 
         card.innerHTML = `
           <h3>${regalo.nombre}</h3>
-          <p>Quedan: <span id="cantidad-${regalo.id}">${regalo.cantidad}</span></p>
+          <p>Disponible: <span id="cantidad-${regalo.id}">${regalo.cantidad}</span></p>
           ${regalo.disponible 
  ? `<button class="btn" onclick="reservar(${regalo.id}, ${regalo.cantidad})">💝 ¡Quiero regalar esto!</button>` 
  : `<p>✨ Ya reservado con amor</p>`}
