@@ -64,9 +64,11 @@
 </head>
 <body>
 
-  <h1>🎁 Lista de Regalitos</h1>
-  <p>Elige tu regalo disponible y deja tu nombre 💖</p>
-  <div class="container" id="giftList">Cargando...</div>
+  <h1>🎁 Con mucho cariño para ti</h1>
+<p>Si deseas acompañarnos con un detallito, aquí te dejamos algunas ideas 💕<br>
+Elige con libertad y deja tu nombrecito 🌸</p>
+<div class="container" id="giftList">Preparando la lista con amor...</div>
+
 
   <script>
     const API_URL = 'https://losfyembcwcqnvbzaupu.supabase.co/rest/v1/regalos';
@@ -108,7 +110,7 @@
     }
 
     function reservar(id, cantidadActual) {
-      const nombre = prompt("Escribe tu nombre para reservar:");
+      const nombre = prompt("¡Gracias por tu cariño! 💖\nCuéntanos tu nombre para guardar tu detalle:");
       if (!nombre) return;
 
       let nuevaCantidad = cantidadActual - 1;
