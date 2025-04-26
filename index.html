@@ -3,95 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista de Regalos Baby Shower</title>
+  <title>🎀 Detallitos para Mateo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet">
   <style>
-  body { 
-    font-family: 'Arial', sans-serif; 
-    background: linear-gradient(135deg, #ffe0ec, #e0f7fa); 
-    margin: 0; 
-    padding: 20px;
-    color: #555;
-  }
-
-  h1 { 
-    color: #ff4f81; 
-    margin-bottom: 10px; 
-    font-size: 1.5rem;
-  }
-
-  p { 
-    margin-top: 0; 
-    font-size: 0.95rem;
-  }
-
-  .scroll-container {
-    display: flex;
-    overflow-x: auto;
-    gap: 10px;
-    padding: 10px 0;
-  }
-
-  .card {
-    flex: 0 0 auto;
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    width: 140px;
-    padding: 12px;
-    transition: transform 0.2s;
-  }
-
-  .card:hover {
-    transform: translateY(-5px);
-  }
-
-  .btn {
-    background-color: #ff4f81;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 20px;
-    cursor: pointer;
-    margin-top: 8px;
-    font-size: 0.8rem;
-    transition: background 0.3s;
-  }
-
-  .btn:hover {
-    background-color: #e43e6f;
-  }
-
-  .no-disponible {
-    opacity: 0.4;
-  }
-
-  /* Ocultar scrollbar en algunos navegadores */
-  .scroll-container::-webkit-scrollbar {
-    display: none;
-  }
-  .scroll-container {
-    -ms-overflow-style: none; 
-    scrollbar-width: none;
-  }
-
-  @media (max-width: 600px) {
-    .card {
-      width: 120px;
+    body { 
+      font-family: 'Poppins', sans-serif; 
+      background: linear-gradient(135deg, #ffeef2, #e0f7fa); 
+      margin: 0; 
+      padding: 20px;
+      color: #444;
     }
-  }
-</style>
 
+    h1 { 
+      color: #ff4f81; 
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+    }
+
+    .nota {
+      background: #fff0f5;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 12px;
+      transition: transform 0.2s, background 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .btn {
+      background-color: #ff4f81;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #e43e6f;
+    }
+
+    .no-disponible {
+      background: #f0f0f0;
+      color: #999;
+      font-style: italic;
+    }
+
+    .apartado {
+      margin-top: 8px;
+      color: #4caf50;
+      font-size: 0.8rem;
+    }
+
+  </style>
 </head>
 <body>
 
-<h1>🎀 Con mucho amor para Mateo</h1>
-  <p>
-  Si deseas acompañarnos con un detallito especial, aquí te dejamos algunas ideas 💕.<br>
-  Solo es para <b>apartarlo</b> y que no se repita 😊.<br>
-  ¡Gracias por tu cariño y libertad de elegir con amor! 🌸
-</p>
-<div class="scroll-container" id="giftList">Preparando la lista con amor...</div>
+  <h1>🎀 Detallitos para Mateo</h1>
+  <div class="nota">
+    Esta es una lista para <b>apartar</b> el regalito que desees obsequiarle a Mateo 💕.<br>
+    No es una tienda es para dar ideas de que pueden regalarnos, puedes escoger el detalle con amor y ¡gracias por hacerlo especial! 🌸
+  </div>
 
+  <div class="grid-container" id="giftList">
+    Cargando los detallitos con amor...
+  </div>
 
   <script>
     const API_URL = 'https://losfyembcwcqnvbzaupu.supabase.co/rest/v1/regalos';
@@ -104,7 +108,6 @@
       'Content-Type': 'application/json'
     };
 
-    // Cargar regalos
     fetch(API_URL, { headers })
       .then(res => res.json())
       .then(data => mostrarRegalos(data))
@@ -121,63 +124,56 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.id = `regalo-${regalo.id}`;
-        if (!regalo.disponible) card.classList.add('no-disponible');
 
         card.innerHTML = `
-          <h3>${regalo.nombre}</h3>
-          <p>Disponible: <span id="cantidad-${regalo.id}">${regalo.cantidad}</span></p>
+          <div>${regalo.nombre}</div>
           ${regalo.disponible 
- ? `<button class="btn" onclick="reservar(${regalo.id}, ${regalo.cantidad})">💝 ¡Quiero regalar esto!</button>` 
- : `<p>✨ Ya reservado con amor</p>`}
+            ? `<button class="btn" onclick="reservar(${regalo.id}, ${regalo.cantidad})">Apartar 💝</button>` 
+            : `<div class="apartado">✔️ Apartado con amor❤️</div>`}
         `;
+
+        if (!regalo.disponible) {
+          card.classList.add('no-disponible');
+        }
+
         container.appendChild(card);
       });
     }
 
     function reservar(id, cantidadActual) {
-      const nombre = prompt("¡Gracias por tu cariño! 💖\nCuéntanos tu nombre para guardar tu detalle:");
+      const nombre = prompt("💖 Cuéntanos tu nombre para guardar este detalle:");
       if (!nombre) return;
 
       let nuevaCantidad = cantidadActual - 1;
       let disponible = nuevaCantidad > 0;
 
-      // PATCH para actualizar cantidad y disponibilidad
       fetch(`${API_URL}?id=eq.${id}`, {
         method: 'PATCH',
-        headers: {
-          ...headers,
-          Prefer: 'return=representation'
-        },
+        headers: { ...headers, Prefer: 'return=representation' },
         body: JSON.stringify({ cantidad: nuevaCantidad, disponible: disponible })
       })
       .then(res => res.json())
       .then(() => {
-        // POST para registrar al invitado
         return fetch(RESERVAS_URL, {
           method: 'POST',
           headers: headers,
-          body: JSON.stringify({
-            invitado: nombre,
-            regalo_id: id
-          })
+          body: JSON.stringify({ invitado: nombre, regalo_id: id })
         });
       })
       .then(() => {
-        document.getElementById(`cantidad-${id}`).innerText = nuevaCantidad;
         const card = document.getElementById(`regalo-${id}`);
-        if (!disponible) {
-          card.classList.add('no-disponible');
-          const btn = card.querySelector('.btn');
-          if (btn) btn.remove();
-          const p = document.createElement('p');
-          p.innerText = 'No disponible';
-          card.appendChild(p);
-        }
-        alert("¡Mil gracias, " + nombre + "! 🎀 Tu regalito ha sido apartado con mucho amor. Nos haces muy felices 💕");
+        card.classList.add('no-disponible');
+        const btn = card.querySelector('.btn');
+        if (btn) btn.remove();
+        const p = document.createElement('div');
+        p.className = 'apartado';
+        p.innerText = '✔️ Apartado';
+        card.appendChild(p);
+        alert("¡Gracias, " + nombre + "! 🎀 Tu detalle ha sido apartado con amor.");
       })
       .catch(err => {
         console.error("Error en la reserva:", err);
-        alert("Ups... hubo un pequeño problema al registrar tu detalle 😢.\nPor favor intenta nuevamente o avísanos.");
+        alert("Ups... hubo un problemita al registrar tu detalle 😢");
       });
     }
   </script>
