@@ -203,7 +203,7 @@ export function TeamSection() {
           <Btn type="submit">Agregar</Btn>
         </form>
       )}
-      {isOwner && <p className="text-xs text-slate-500">La persona primero crea su cuenta en PlayTime con su correo; luego la agregas aquí.</p>}
+      {isOwner && <p className="text-xs text-slate-500">La persona primero crea su cuenta en Full Time con su correo; luego la agregas aquí.</p>}
       {msg && <p className="rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{msg}</p>}
     </Section>
   )

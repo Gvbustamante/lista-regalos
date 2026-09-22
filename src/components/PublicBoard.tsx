@@ -24,9 +24,12 @@ export function PublicBoard({ title, items, offsetMs = 0, notice }: { title: str
   return (
     <div className="min-h-dvh bg-canvas p-6 lg:p-12" onDoubleClick={fullscreen}>
       <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
-        <div>
+        <div className="flex items-center gap-4">
+          <img src="/logo.webp" alt="Full Time" className="h-20 w-auto lg:h-28" />
+          <div>
           <div className="text-lg font-medium text-slate-500">{title}</div>
           <h1 className="text-4xl font-extrabold tracking-tight text-ink lg:text-6xl">Niños en el parque</h1>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-3xl font-bold tabular-nums text-slate-500 lg:text-4xl">{clock}</span>

@@ -12,9 +12,9 @@ export function AdminLayout() {
       <header className="sticky top-0 z-30 border-b border-line bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-6">
           <div className="flex items-center gap-3">
-            <img src="/icon.svg" alt="" className="size-10" />
+            <img src="/mark.png" alt="" className="size-10 object-contain" />
             <div>
-              <div className="text-lg font-extrabold text-ink">PlayTime Admin</div>
+              <div className="text-lg font-extrabold text-ink">Full Time Admin</div>
               <div className="text-xs text-slate-500">{user?.email}</div>
             </div>
           </div>

@@ -1,15 +1,15 @@
 @import 'tailwindcss';
 
-/* PlayTime: base limpia (blanco + gris muy claro), morado como acento, amarillo para acciones de cierre */
+/* Full Time: base limpia (blanco + gris muy claro), azul del logo como acento, amarillo para acciones de cierre */
 @theme {
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --color-brand: #7c3aed;
-  --color-brand-dark: #6d28d9;
-  --color-brand-soft: #f3eefe;
-  --color-brand-line: #d9c9fb;
+  --color-brand: #1d6ff2;
+  --color-brand-dark: #1557c9;
+  --color-brand-soft: #e9f2ff;
+  --color-brand-line: #bcd5fd;
   --color-canvas: #f7f7fa;
   --color-line: #ebe9f1;
-  --color-sun: #ffd84d;
+  --color-sun: #ffd21f;
   --color-sun-dark: #f2b705;
   --color-ink: #1f2240;
   --shadow-card: 0 1px 2px rgb(31 34 64 / 0.04), 0 6px 20px -8px rgb(31 34 64 / 0.08);

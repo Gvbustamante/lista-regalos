@@ -24,6 +24,6 @@ export function contactLinks(usage: Usage | null, reason: string) {
   const wa = usage?.contact.whatsapp?.replace(/\D/g, '')
   return {
     whatsapp: wa ? `https://wa.me/${wa}?text=${text}` : null,
-    email: usage?.contact.email ? `mailto:${usage.contact.email}?subject=${encodeURIComponent('Plan PlayTime')}&body=${text}` : null,
+    email: usage?.contact.email ? `mailto:${usage.contact.email}?subject=${encodeURIComponent('Plan Full Time')}&body=${text}` : null,
   }
 }
