@@ -72,6 +72,30 @@ Sus sedes comparten ese plan. Los límites se editan en `/admin/planes`.
 4. En **Settings → Git → Production Branch**, pon la rama que quieras publicar (por ejemplo `claude/github-repositories-qpkz0w`, o `main` después de fusionar).
 5. En Supabase → Authentication → URL Configuration, agrega el dominio de Vercel en **Redirect URLs**.
 
+## Buenas prácticas aplicadas
+
+**Base de datos**
+- Seguridad (RLS) en todas las tablas `playtime_*`, con **una sola regla por tabla y acción**.
+- Las reglas usan `business_id in (select playtime_private.my_business_ids())`, que se calcula una vez por consulta y no fila por fila.
+- Las funciones auxiliares están en el esquema privado `playtime_private`, fuera de la API. Las funciones internas de límites no se pueden llamar desde afuera.
+- Hay índices para las llaves foráneas y para las consultas de sincronización (`business_id, synced_at`) y de reportes (`business_id, created_at`).
+
+**Servidor**
+- Los límites del plan y los campos de administración se protegen con triggers, no solo en la app.
+- Las funciones `security definer` fijan `search_path = ''` y revisan permisos adentro.
+
+**App**
+- Cada consulta tiene un límite de 20 segundos, así que una petición colgada no bloquea la sincronización.
+- **Sincronización:**
+  - las subidas van en orden (primero lo que otras tablas necesitan) y las descargas en paralelo;
+  - no vuelve a guardar filas que no cambiaron;
+  - si cambias de sede mientras sincroniza, repite para la sede nueva;
+  - el tiempo real nunca bloquea la descarga.
+- **Sesión:** se procesa una sola vez por usuario.
+- **Cambio de sede:** trae la ficha de la sede antes de cambiar. Si tarda más de 8 segundos, ofrece reintentar o volver.
+- **Carga:** las páginas secundarias y el panel admin se descargan solo al entrar, así que el archivo inicial pesa 297 KB (antes 653 KB).
+- **Errores:** un manejador de errores evita pantallas en blanco.
+
 ## Stack
 
 React + TypeScript + Vite · Tailwind CSS v4 · Dexie (IndexedDB) · Supabase (Auth, Postgres, Realtime) · PWA · Capacitor
