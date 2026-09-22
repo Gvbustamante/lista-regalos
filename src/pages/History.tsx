@@ -39,7 +39,7 @@ export function History() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="mb-4 text-3xl font-black text-brand">Historial</h1>
+      <h1 className="mb-4 text-2xl font-extrabold text-ink">Historial</h1>
       <RangeFilter value={r.key} onChange={r.setKey} from={r.from} to={r.to} onFrom={r.setFrom} onTo={r.setTo} />
 
       <div className="mb-5 grid grid-cols-3 gap-3">
@@ -48,7 +48,7 @@ export function History() {
         <Stat label="Ingresos" value={money(sum.income, business?.currency)} tone="emerald" />
       </div>
 
-      <div className="overflow-hidden rounded-[28px] bg-mint">
+      <div className="overflow-hidden rounded-3xl bg-white border border-line shadow-card">
         {rows.length === 0 ? (
           <p className="p-10 text-center font-semibold text-slate-400">Sin entradas en este periodo</p>
         ) : (
@@ -67,7 +67,7 @@ export function History() {
                   </span>
                   <span className="hidden text-slate-500 sm:block">{paymentLabel(s.payment_method)}</span>
                   <span className={`hidden rounded-full px-2 py-1 text-center text-xs font-bold sm:block ${STATUS[s.status].cls}`}>{STATUS[s.status].label}</span>
-                  <span className={`text-right font-black ${s.status === 'cancelled' ? 'text-slate-300 line-through' : 'text-slate-800'}`}>{money(paid, business?.currency)}</span>
+                  <span className={`text-right font-extrabold ${s.status === 'cancelled' ? 'text-slate-300 line-through' : 'text-slate-800'}`}>{money(paid, business?.currency)}</span>
                 </button>
               </li>
             ))}

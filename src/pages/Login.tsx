@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { supabase } from '../database/supabase/client'
+import { inputCls } from '../components/ui'
 
-const input = 'w-full rounded-2xl border-2 border-slate-200 bg-white px-4 py-3 text-lg outline-none focus:border-brand'
 
 export function Login() {
   const [mode, setMode] = useState<'in' | 'up'>('in')
@@ -25,17 +25,17 @@ export function Login() {
   }
 
   return (
-    <div className="grid min-h-dvh place-items-center bg-gradient-to-br from-mint to-mint-soft p-4">
-      <form onSubmit={submit} className="grid w-full max-w-md gap-4 rounded-3xl bg-white p-8 shadow-xl">
+    <div className="grid min-h-dvh place-items-center bg-canvas p-4">
+      <form onSubmit={submit} className="grid w-full max-w-md gap-4 rounded-3xl border border-line bg-white p-8 shadow-card">
         <div className="text-center">
           <img src="/icon.svg" alt="" className="mx-auto size-20" />
-          <h1 className="mt-2 text-3xl font-black text-brand">PlayTime</h1>
+          <h1 className="mt-2 text-2xl font-extrabold text-ink">PlayTime</h1>
           <p className="text-slate-500">Control de tiempo para mini parques</p>
         </div>
-        <input className={input} type="email" required placeholder="Correo" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input className={input} type="password" required minLength={6} placeholder="Contraseña" autoComplete={mode === 'in' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} />
+        <input className={inputCls} type="email" required placeholder="Correo" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input className={inputCls} type="password" required minLength={6} placeholder="Contraseña" autoComplete={mode === 'in' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} />
         {msg && <p className={`rounded-2xl p-3 font-semibold ${msg.ok ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>{msg.text}</p>}
-        <button disabled={busy} className="rounded-2xl bg-brand py-4 text-xl font-black text-white disabled:opacity-50">
+        <button disabled={busy} className="rounded-2xl bg-brand py-4 text-xl font-extrabold text-white disabled:opacity-50">
           {mode === 'in' ? 'Entrar' : 'Crear cuenta'}
         </button>
         <button type="button" onClick={() => (setMode(mode === 'in' ? 'up' : 'in'), setMsg(null))} className="font-bold text-slate-500">

@@ -9,10 +9,8 @@ import { duration, money } from '../utils/format'
 import { unlockAudio } from '../utils/sound'
 import { Modal } from './Modal'
 import { PaymentPicker } from './PaymentPicker'
-import { Btn } from './ui'
+import { Btn, inputCls } from './ui'
 
-const input = 'w-full rounded-2xl border-2 border-slate-200 bg-white px-4 py-3 text-lg outline-none focus:border-brand'
-const label = 'mb-1 block text-sm font-bold uppercase tracking-wide text-slate-500'
 
 export function NewEntryModal({ onClose }: { onClose: () => void }) {
   const { business, user } = useAuth()
@@ -91,10 +89,10 @@ export function NewEntryModal({ onClose }: { onClose: () => void }) {
       <form onSubmit={submit} className="grid gap-5">
         <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
           <div className="relative">
-            <label className={label} htmlFor="ne-name">Nombre del niño</label>
+            <label className="mb-1.5 block text-sm font-medium text-slate-600" htmlFor="ne-name">Nombre del niño</label>
             <input
               id="ne-name"
-              className={input}
+              className={inputCls}
               value={name}
               autoFocus
               autoComplete="off"
@@ -104,7 +102,7 @@ export function NewEntryModal({ onClose }: { onClose: () => void }) {
               }}
             />
             {suggestions.length > 0 && (
-              <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-lg">
+              <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-2xl border border-line bg-white shadow-card">
                 {suggestions.map((c) => (
                   <li key={c.id}>
                     <button type="button" onClick={() => pickChild(c.id)} className="flex w-full justify-between px-4 py-3 text-left hover:bg-brand-soft">
@@ -118,64 +116,64 @@ export function NewEntryModal({ onClose }: { onClose: () => void }) {
             {childId && <p className="mt-1 text-sm font-semibold text-emerald-600">✓ Cliente frecuente</p>}
           </div>
           <div>
-            <label className={label} htmlFor="ne-age">Edad</label>
-            <input id="ne-age" className={input} inputMode="numeric" value={age} onChange={(e) => setAge(e.target.value.replace(/\D/g, ''))} />
+            <label className="mb-1.5 block text-sm font-medium text-slate-600" htmlFor="ne-age">Edad</label>
+            <input id="ne-age" className={inputCls} inputMode="numeric" value={age} onChange={(e) => setAge(e.target.value.replace(/\D/g, ''))} />
           </div>
           <div>
-            <label className={label} htmlFor="ne-guardian">Acompañante</label>
-            <input id="ne-guardian" className={input} value={guardian} onChange={(e) => setGuardian(e.target.value)} />
+            <label className="mb-1.5 block text-sm font-medium text-slate-600" htmlFor="ne-guardian">Acompañante</label>
+            <input id="ne-guardian" className={inputCls} value={guardian} onChange={(e) => setGuardian(e.target.value)} />
           </div>
           <div>
-            <label className={label} htmlFor="ne-phone">Teléfono</label>
-            <input id="ne-phone" className={input} inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <label className="mb-1.5 block text-sm font-medium text-slate-600" htmlFor="ne-phone">Teléfono</label>
+            <input id="ne-phone" className={inputCls} inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
           </div>
         </div>
 
         <div>
-          <span className={label}>Tiempo</span>
+          <span className="mb-1.5 block text-sm font-medium text-slate-600">Tiempo</span>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {plans.map((p) => (
               <button
                 type="button"
                 key={p.id}
                 onClick={() => selectPlan(p.id)}
-                className={`rounded-[22px] border-4 px-3 py-4 text-center text-brand ${planId === p.id ? 'border-brand bg-brand-soft' : 'border-mint-dark bg-mint-soft'}`}
+                className={`rounded-2xl border-2 px-3 py-3.5 text-center transition ${planId === p.id ? 'border-brand bg-brand-soft text-brand' : 'border-line bg-white text-ink hover:border-brand-line'}`}
               >
-                <div className="text-xl font-black">{duration(p.duration_minutes).toUpperCase()}</div>
-                <div className="text-sm font-semibold text-slate-500">{p.name} · {money(p.price, business?.currency)}</div>
+                <div className="text-lg font-bold">{duration(p.duration_minutes)}</div>
+                <div className="text-xs text-slate-500">{p.name} · {money(p.price, business?.currency)}</div>
               </button>
             ))}
             <button
               type="button"
               onClick={() => selectPlan('custom')}
-              className={`rounded-[22px] border-4 px-3 py-4 text-center text-brand ${planId === 'custom' ? 'border-brand bg-brand-soft' : 'border-mint-dark bg-mint-soft'}`}
+              className={`rounded-2xl border-2 px-3 py-3.5 text-center transition ${planId === 'custom' ? 'border-brand bg-brand-soft text-brand' : 'border-line bg-white text-ink hover:border-brand-line'}`}
             >
-              <div className="text-xl font-black">PERSONALIZADO</div>
-              <div className="text-sm font-semibold text-slate-500">Minutos a elección</div>
+              <div className="text-lg font-bold">Personalizado</div>
+              <div className="text-xs text-slate-500">Minutos a elección</div>
             </button>
           </div>
           {planId === 'custom' && (
             <div className="mt-3 max-w-48">
-              <label className={label} htmlFor="ne-min">Minutos</label>
-              <input id="ne-min" className={input} inputMode="numeric" value={customMin} onChange={(e) => setCustomMin(e.target.value.replace(/\D/g, ''))} />
+              <label className="mb-1.5 block text-sm font-medium text-slate-600" htmlFor="ne-min">Minutos</label>
+              <input id="ne-min" className={inputCls} inputMode="numeric" value={customMin} onChange={(e) => setCustomMin(e.target.value.replace(/\D/g, ''))} />
             </div>
           )}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
           <div>
-            <label className={label} htmlFor="ne-price">Precio</label>
-            <input id="ne-price" className={input} inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value.replace(/[^\d.]/g, ''))} placeholder="0" />
+            <label className="mb-1.5 block text-sm font-medium text-slate-600" htmlFor="ne-price">Precio</label>
+            <input id="ne-price" className={inputCls} inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value.replace(/[^\d.]/g, ''))} placeholder="0" />
           </div>
           <div>
-            <span className={label}>Método de pago</span>
+            <span className="mb-1.5 block text-sm font-medium text-slate-600">Método de pago</span>
             <PaymentPicker value={method} onChange={setMethod} />
           </div>
         </div>
 
         {error && <p className="rounded-2xl bg-red-50 px-4 py-3 font-semibold text-red-600">{error}</p>}
 
-        <Btn variant="sun" disabled={saving} className="py-5 text-2xl">
+        <Btn disabled={saving} className="py-4 text-lg">
           ▶ Iniciar tiempo
         </Btn>
       </form>

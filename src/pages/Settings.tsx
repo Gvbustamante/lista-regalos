@@ -5,8 +5,8 @@ import { updateBusiness } from '../features/business/repo'
 import { syncNow } from '../features/sync/engine'
 import { useSyncState } from '../features/sync/useSync'
 import { playTimeUp } from '../utils/sound'
+import { inputCls } from '../components/ui'
 
-const input = 'w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2 outline-none focus:border-brand disabled:bg-slate-50'
 const CURRENCIES = ['COP', 'USD', 'MXN', 'PEN', 'CLP', 'ARS', 'EUR']
 
 export function Settings() {
@@ -63,26 +63,26 @@ export function Settings() {
 
   return (
     <div className="mx-auto grid max-w-4xl gap-5">
-      <h1 className="text-3xl font-black text-brand">Ajustes</h1>
+      <h1 className="text-2xl font-extrabold text-ink">Ajustes</h1>
 
-      <section className="grid gap-4 rounded-[28px] bg-mint p-5 sm:grid-cols-2">
-        <h2 className="text-lg font-black sm:col-span-2">Negocio</h2>
-        <label className="grid gap-1 text-sm font-bold text-slate-500">Nombre
-          <input className={input} disabled={!canManage} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+      <section className="grid gap-4 rounded-3xl bg-white border border-line shadow-card p-5 sm:grid-cols-2">
+        <h2 className="text-base font-bold sm:col-span-2">Negocio</h2>
+        <label className="grid gap-1.5 text-sm font-medium text-slate-600">Nombre
+          <input className={inputCls} disabled={!canManage} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         </label>
-        <label className="grid gap-1 text-sm font-bold text-slate-500">Teléfono
-          <input className={input} disabled={!canManage} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+        <label className="grid gap-1.5 text-sm font-medium text-slate-600">Teléfono
+          <input className={inputCls} disabled={!canManage} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
         </label>
-        <label className="grid gap-1 text-sm font-bold text-slate-500 sm:col-span-2">Dirección
-          <input className={input} disabled={!canManage} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+        <label className="grid gap-1.5 text-sm font-medium text-slate-600 sm:col-span-2">Dirección
+          <input className={inputCls} disabled={!canManage} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
         </label>
-        <label className="grid gap-1 text-sm font-bold text-slate-500">Moneda
-          <select className={input} disabled={!canManage} value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
+        <label className="grid gap-1.5 text-sm font-medium text-slate-600">Moneda
+          <select className={inputCls} disabled={!canManage} value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
             {CURRENCIES.map((c) => <option key={c}>{c}</option>)}
           </select>
         </label>
-        <label className="grid gap-1 text-sm font-bold text-slate-500">Avisar cuando falten (minutos)
-          <input className={input} disabled={!canManage} inputMode="numeric" value={form.alert_minutes} onChange={(e) => setForm({ ...form, alert_minutes: e.target.value.replace(/\D/g, '') })} />
+        <label className="grid gap-1.5 text-sm font-medium text-slate-600">Avisar cuando falten (minutos)
+          <input className={inputCls} disabled={!canManage} inputMode="numeric" value={form.alert_minutes} onChange={(e) => setForm({ ...form, alert_minutes: e.target.value.replace(/\D/g, '') })} />
         </label>
         <div className="flex items-center gap-4 sm:col-span-2">
           <label className="flex items-center gap-2 font-semibold text-slate-700">
@@ -93,14 +93,14 @@ export function Settings() {
         </div>
         {error && <p className="font-semibold text-red-600 sm:col-span-2">{error}</p>}
         {canManage && (
-          <button onClick={save} className="rounded-full bg-sun py-3 font-black text-brand shadow-[0_5px_0_var(--color-sun-dark)] sm:col-span-2">
+          <button onClick={save} className="rounded-full bg-sun py-3 font-extrabold text-brand shadow-[0_5px_0_var(--color-sun-dark)] sm:col-span-2">
             {saved ? '✓ Guardado' : 'Guardar cambios'}
           </button>
         )}
       </section>
 
-      <section className="grid gap-4 rounded-[28px] bg-mint p-5 sm:grid-cols-[auto_1fr]">
-        <h2 className="text-lg font-black sm:col-span-2">📺 Pantalla pública</h2>
+      <section className="grid gap-4 rounded-3xl bg-white border border-line shadow-card p-5 sm:grid-cols-[auto_1fr]">
+        <h2 className="text-base font-bold sm:col-span-2">📺 Pantalla pública</h2>
         {qr && <img src={qr} alt="Código QR de la pantalla pública" className="size-44 rounded-2xl border" />}
         <div className="grid content-start gap-3">
           <p className="text-slate-600">Abre este enlace en una TV o tablet del parque. Solo muestra nombre y tiempo restante.</p>
@@ -120,8 +120,8 @@ export function Settings() {
         </div>
       </section>
 
-      <section className="grid gap-3 rounded-[28px] bg-mint p-5">
-        <h2 className="text-lg font-black">Sincronización</h2>
+      <section className="grid gap-3 rounded-3xl bg-white border border-line shadow-card p-5">
+        <h2 className="text-base font-bold">Sincronización</h2>
         <p className="text-slate-600">
           {sync.online ? 'En línea' : 'Sin conexión — los datos se guardan en este dispositivo'} · Pendientes: <b>{sync.pending}</b>
           {sync.lastSyncAt && <> · Última: {new Date(sync.lastSyncAt).toLocaleTimeString('es-CO')}</>}
@@ -132,12 +132,12 @@ export function Settings() {
         </button>
       </section>
 
-      <section className="flex flex-wrap items-center justify-between gap-3 rounded-[28px] bg-mint p-5">
+      <section className="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-white border border-line shadow-card p-5">
         <div className="text-slate-600">
           {user?.email} · <span className="font-bold capitalize">{membership?.role === 'owner' ? 'Dueño' : membership?.role === 'admin' ? 'Administrador' : 'Empleado'}</span>
         </div>
         <div className="flex gap-2">
-          {isPlatformAdmin && <a href="/admin" className="rounded-full bg-brand px-4 py-2 font-black text-white">🛡 Panel admin</a>}
+          {isPlatformAdmin && <a href="/admin" className="rounded-full bg-brand px-4 py-2 font-extrabold text-white">🛡 Panel admin</a>}
           <button onClick={logout} className="rounded-full bg-red-50 px-4 py-2 font-bold text-red-600">Cerrar sesión</button>
         </div>
       </section>

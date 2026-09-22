@@ -38,10 +38,10 @@ export function AdminHome() {
     <div className="grid gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-sm font-black text-brand/60">Panel de plataforma</div>
-          <h1 className="text-3xl font-black text-brand">Negocios registrados</h1>
+          <div className="text-sm font-medium text-slate-500">Panel de plataforma</div>
+          <h1 className="text-2xl font-extrabold text-ink">Negocios registrados</h1>
         </div>
-        <button onClick={reload} className="rounded-full bg-white px-4 py-2 font-black text-brand">↻ Actualizar</button>
+        <button onClick={reload} className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:bg-canvas">↻ Actualizar</button>
       </div>
 
       {error && <p className="rounded-2xl bg-red-50 p-3 font-bold text-red-600">{error}</p>}
@@ -57,9 +57,9 @@ export function AdminHome() {
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {plans.map((p) => (
-          <button key={p.id} onClick={() => setFilter(filter === p.id ? 'all' : p.id)} className={`rounded-[24px] p-4 text-left transition ${filter === p.id ? 'bg-brand text-white' : 'bg-white text-brand'}`}>
-            <div className="text-sm font-black opacity-70">Plan {p.name}</div>
-            <div className="text-3xl font-black">{rows.filter((b) => b.saas_plan === p.id).length}</div>
+          <button key={p.id} onClick={() => setFilter(filter === p.id ? 'all' : p.id)} className={`rounded-2xl border p-4 text-left transition ${filter === p.id ? 'bg-ink text-white' : 'border border-line bg-white text-slate-600 hover:text-ink'}`}>
+            <div className="text-sm font-extrabold opacity-70">Plan {p.name}</div>
+            <div className="text-3xl font-extrabold">{rows.filter((b) => b.saas_plan === p.id).length}</div>
             <div className="text-xs font-bold opacity-70">{money(p.price_monthly, p.currency)} / mes</div>
           </button>
         ))}
@@ -70,17 +70,17 @@ export function AdminHome() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Buscar por nombre, correo o teléfono…"
-          className="min-w-64 flex-1 rounded-full border-2 border-mint-dark bg-white px-5 py-3 outline-none focus:border-brand"
+          className="min-w-64 flex-1 rounded-xl border border-line bg-white px-5 py-3 outline-none focus:border-brand focus:ring-4 focus:ring-brand-soft"
         />
         {[['all', 'Todos'], ['suspended', 'Suspendidos']].map(([k, l]) => (
-          <button key={k} onClick={() => setFilter(k)} className={`rounded-full px-4 py-3 font-black ${filter === k ? 'bg-brand text-white' : 'bg-white text-brand'}`}>{l}</button>
+          <button key={k} onClick={() => setFilter(k)} className={`rounded-full px-4 py-3 text-sm font-semibold ${filter === k ? 'bg-ink text-white' : 'border border-line bg-white text-slate-600 hover:text-ink'}`}>{l}</button>
         ))}
       </div>
 
       {loading && !data ? (
-        <p className="p-10 text-center font-bold text-brand/50">Cargando…</p>
+        <p className="p-10 text-center font-bold text-slate-400">Cargando…</p>
       ) : filtered.length === 0 ? (
-        <p className="rounded-[28px] bg-mint p-10 text-center font-bold text-brand/50">No hay negocios con ese filtro</p>
+        <p className="rounded-3xl bg-white border border-line shadow-card p-10 text-center font-bold text-slate-400">No hay negocios con ese filtro</p>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((b) => <BusinessCard key={b.id} b={b} plan={planById.get(b.saas_plan)} />)}
@@ -94,34 +94,34 @@ function BusinessCard({ b, plan }: { b: AdminBusinessRow; plan?: SaasPlan }) {
   const limit = plan?.max_sessions_month ?? null
   const usage = limit ? b.sessions_month / limit : 0
   return (
-    <Link to={`/admin/negocios/${b.id}`} className={`flex flex-col gap-4 rounded-[28px] bg-mint p-5 transition hover:ring-4 hover:ring-brand-line ${b.status === 'suspended' ? 'opacity-70' : ''}`}>
+    <Link to={`/admin/negocios/${b.id}`} className={`flex flex-col gap-4 rounded-3xl bg-white border border-line shadow-card p-5 transition hover:ring-4 hover:ring-brand-line ${b.status === 'suspended' ? 'opacity-70' : ''}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="truncate text-xl font-black text-ink">{b.name}</div>
-          <div className="truncate text-sm font-bold text-brand/60">{b.owner_email ?? 'sin dueño'}</div>
+          <div className="truncate text-lg font-bold text-ink">{b.name}</div>
+          <div className="truncate text-sm font-medium text-slate-500">{b.owner_email ?? 'sin dueño'}</div>
         </div>
         <StatusPill status={b.status} />
       </div>
       <div className="flex items-center gap-4">
         <Ring progress={limit ? 1 - Math.min(1, usage) : 1} color={usage > 0.9 ? '#ef4444' : '#ffe11c'} size={84} stroke={11}>
-          <span className="text-center text-xs font-black leading-tight text-brand">
+          <span className="text-center text-xs font-extrabold leading-tight text-brand">
             {b.sessions_month}
             <br />
-            <span className="text-[10px] text-brand/60">{limit ? `de ${limit}` : 'sesiones'}</span>
+            <span className="text-[10px] text-slate-500">{limit ? `de ${limit}` : 'sesiones'}</span>
           </span>
         </Ring>
         <dl className="grid flex-1 grid-cols-2 gap-x-3 gap-y-1 text-sm">
-          <dt className="font-bold text-brand/60">Plan</dt>
-          <dd className="font-black text-brand">{plan?.name ?? b.saas_plan}</dd>
-          <dt className="font-bold text-brand/60">En parque</dt>
-          <dd className="font-black">{b.active_now}</dd>
-          <dt className="font-bold text-brand/60">Ventas mes</dt>
-          <dd className="font-black">{money(b.revenue_month, b.currency)}</dd>
-          <dt className="font-bold text-brand/60">Cuentas</dt>
-          <dd className="font-black">{b.members}</dd>
+          <dt className="font-medium text-slate-500">Plan</dt>
+          <dd className="font-extrabold text-brand">{plan?.name ?? b.saas_plan}</dd>
+          <dt className="font-medium text-slate-500">En parque</dt>
+          <dd className="font-extrabold">{b.active_now}</dd>
+          <dt className="font-medium text-slate-500">Ventas mes</dt>
+          <dd className="font-extrabold">{money(b.revenue_month, b.currency)}</dd>
+          <dt className="font-medium text-slate-500">Cuentas</dt>
+          <dd className="font-extrabold">{b.members}</dd>
         </dl>
       </div>
-      <div className="flex items-center justify-between text-xs font-bold text-brand/60">
+      <div className="flex items-center justify-between text-xs text-slate-500">
         <span>Creado {dateShort(b.created_at)}</span>
         <span>{b.last_activity ? `Última actividad ${dateShort(b.last_activity)}` : 'Sin actividad'}</span>
       </div>

@@ -1,18 +1,18 @@
 @import 'tailwindcss';
 
-/* Estilo PlayTime: menta + morado + amarillo sol */
+/* PlayTime: base limpia (blanco + gris muy claro), morado como acento, amarillo para acciones de cierre */
 @theme {
-  --font-sans: 'Nunito', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
-  --color-brand: #8b1fe8;
-  --color-brand-dark: #6c12bd;
-  --color-brand-soft: #f1e6fe;
-  --color-brand-line: #cfaef8;
-  --color-mint: #d5efe1;
-  --color-mint-soft: #ebf8f1;
-  --color-mint-dark: #b9e2cc;
-  --color-sun: #ffe11c;
-  --color-sun-dark: #f0b400;
-  --color-ink: #262a5a;
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --color-brand: #7c3aed;
+  --color-brand-dark: #6d28d9;
+  --color-brand-soft: #f3eefe;
+  --color-brand-line: #d9c9fb;
+  --color-canvas: #f7f7fa;
+  --color-line: #ebe9f1;
+  --color-sun: #ffd84d;
+  --color-sun-dark: #f2b705;
+  --color-ink: #1f2240;
+  --shadow-card: 0 1px 2px rgb(31 34 64 / 0.04), 0 6px 20px -8px rgb(31 34 64 / 0.08);
   --animate-pulse-slow: pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -21,9 +21,16 @@ body {
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
   color: var(--color-ink);
+  background: var(--color-canvas);
+  font-feature-settings: 'tnum' 0;
 }
 
 button {
   cursor: pointer;
   touch-action: manipulation;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-brand-line);
+  outline-offset: 2px;
 }

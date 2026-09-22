@@ -31,7 +31,7 @@ export function Dashboard() {
 
   return (
     <div className="mx-auto max-w-7xl">
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <Stat label="En el parque" value={active.length} tone="amber" />
         <Stat label="Entradas hoy" value={today.entries} />
         <Stat label="Por vencer" value={soon + expired} tone="orange" />
@@ -39,14 +39,20 @@ export function Dashboard() {
         <Stat label="Ingresos hoy" value={money(today.income, business?.currency)} tone="emerald" />
       </div>
 
-      <Btn variant="sun" onClick={() => setNewOpen(true)} className="mb-6 w-full py-5 text-2xl">
-        + Nueva entrada
-      </Btn>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-extrabold text-ink">En el parque</h1>
+          <p className="text-sm text-slate-500">{active.length ? `${active.length} ${active.length === 1 ? 'niño' : 'niños'} jugando ahora` : 'Registra la primera entrada del día'}</p>
+        </div>
+        <Btn onClick={() => setNewOpen(true)} className="w-full px-6 py-3.5 text-base sm:w-auto">
+          + Nueva entrada
+        </Btn>
+      </div>
 
       {sorted.length === 0 ? (
-        <div className="rounded-[28px] border-4 border-dashed border-mint-dark bg-mint-soft p-12 text-center">
+        <div className="rounded-3xl border-2 border-dashed border-line bg-white p-12 text-center">
           <div className="text-6xl">🛝</div>
-          <p className="mt-3 text-xl font-bold text-slate-500">No hay niños en el parque</p>
+          <p className="mt-3 text-lg font-semibold text-slate-500">No hay niños en el parque</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

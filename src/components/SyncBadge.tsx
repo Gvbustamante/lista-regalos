@@ -1,21 +1,23 @@
 import { useSyncState } from '../features/sync/useSync'
 
+const base = 'flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold'
+
 export function SyncBadge() {
   const s = useSyncState()
 
   if (!s.online)
     return (
-      <div className="flex items-center gap-2 rounded-full bg-ink px-3 py-1.5 text-sm font-bold text-white" title="Los datos se guardan en este dispositivo">
-        <span className="size-2.5 rounded-full bg-red-400" /> OFFLINE
-        {s.pending > 0 && <span className="rounded-full bg-white/20 px-2 text-xs">{s.pending} pendientes</span>}
+      <div className={`${base} bg-ink text-white`} title="Los datos se guardan en este dispositivo">
+        <span className="size-2 rounded-full bg-red-400" /> Sin conexión
+        {s.pending > 0 && <span className="rounded-full bg-white/15 px-2">{s.pending} pendientes</span>}
       </div>
     )
 
   if (s.syncing)
     return (
-      <div className="flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1.5 text-sm font-bold text-brand">
+      <div className={`${base} bg-brand-soft text-brand`}>
         <span className="hidden sm:inline">Sincronizando</span>
-        <span className="h-2 w-16 overflow-hidden rounded-full bg-white">
+        <span className="h-1.5 w-14 overflow-hidden rounded-full bg-white">
           <span className="block h-full bg-brand transition-all" style={{ width: `${s.progress}%` }} />
         </span>
         {s.progress}%
@@ -24,16 +26,15 @@ export function SyncBadge() {
 
   if (s.error)
     return (
-      <div className="flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1.5 text-sm font-bold text-brand" title={s.error}>
-        <span className="size-2.5 rounded-full bg-brand" /> Sin sincronizar
-        {s.pending > 0 && <span className="text-xs">({s.pending})</span>}
+      <div className={`${base} bg-amber-50 text-amber-800`} title={s.error}>
+        <span className="size-2 rounded-full bg-amber-500" /> Sin sincronizar{s.pending > 0 && ` (${s.pending})`}
       </div>
     )
 
   return (
-    <div className="flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-bold text-emerald-700" title={s.lastSyncAt ? `Última sincronización ${new Date(s.lastSyncAt).toLocaleTimeString()}` : ''}>
-      <span className="size-2.5 rounded-full bg-emerald-500" />
-      {s.pending > 0 ? `${s.pending} pendientes` : s.lastSynced > 0 ? `✓ ${s.lastSynced} sincronizados` : 'En línea'}
+    <div className={`${base} bg-emerald-50 text-emerald-700`} title={s.lastSyncAt ? `Última sincronización ${new Date(s.lastSyncAt).toLocaleTimeString()}` : ''}>
+      <span className="size-2 rounded-full bg-emerald-500" />
+      {s.pending > 0 ? `${s.pending} pendientes` : 'Sincronizado'}
     </div>
   )
 }

@@ -11,8 +11,8 @@ import type { PaymentMethod } from '../types'
 function Bars({ title, rows, fmt }: { title: string; rows: { label: string; value: number }[]; fmt: (v: number) => string }) {
   const max = Math.max(1, ...rows.map((r) => r.value))
   return (
-    <section className="rounded-[28px] bg-mint p-5">
-      <h2 className="mb-4 text-lg font-black text-slate-800">{title}</h2>
+    <section className="rounded-3xl bg-white border border-line shadow-card p-5">
+      <h2 className="mb-4 text-lg font-extrabold text-slate-800">{title}</h2>
       {rows.length === 0 ? (
         <p className="text-slate-400">Sin datos</p>
       ) : (
@@ -66,7 +66,7 @@ export function Reports() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="mb-4 text-3xl font-black text-brand">Reportes</h1>
+      <h1 className="mb-4 text-2xl font-extrabold text-ink">Reportes</h1>
       <RangeFilter value={r.key} onChange={r.setKey} from={r.from} to={r.to} onFrom={r.setFrom} onTo={r.setTo} />
 
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-5">

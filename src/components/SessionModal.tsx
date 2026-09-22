@@ -47,25 +47,25 @@ export function SessionModal({ sessionId, onClose }: { sessionId: string; onClos
   return (
     <Modal title={session.child_name} onClose={onClose} wide>
       {active && (
-        <div className="mb-5 flex flex-col items-center gap-5 rounded-[28px] bg-mint p-5 sm:flex-row sm:justify-center sm:gap-10">
-          <Ring progress={1 - elapsed} color={LEVEL_COLOR[level]} size={170} stroke={22}>
-            <span className="text-7xl" aria-hidden>{level === 'red' ? '⏰' : '🧒'}</span>
+        <div className="mb-5 flex flex-col items-center gap-5 rounded-3xl bg-canvas p-6 sm:flex-row sm:justify-center sm:gap-10">
+          <Ring progress={1 - elapsed} color={LEVEL_COLOR[level]} size={150} stroke={12}>
+            <span className="text-6xl" aria-hidden>{level === 'red' ? '⏰' : '🧒'}</span>
           </Ring>
           <div className="text-center sm:text-left">
             {level === 'red' ? (
               <>
-                <div className="text-3xl font-black text-red-500">¡Tiempo terminado!</div>
-                <div className="font-bold text-red-400">Terminó a las {time(session.expires_at)}</div>
+                <div className="text-3xl font-extrabold text-red-600">Tiempo terminado</div>
+                <div className="text-red-500">Terminó a las {time(session.expires_at)}</div>
               </>
             ) : (
               <>
-                <div className="text-2xl font-black text-brand/70">{session.child_name}</div>
-                <div className={`text-7xl font-black tabular-nums leading-none ${LEVEL_STYLES[level].text}`}>{countdown(remaining)}</div>
-                <div className="mt-1 font-bold text-slate-500">Termina a las {time(session.expires_at)}</div>
+                <div className="text-sm font-medium text-slate-500">Tiempo restante</div>
+                <div className={`text-6xl font-extrabold tabular-nums tracking-tight leading-none ${LEVEL_STYLES[level].text}`}>{countdown(remaining)}</div>
+                <div className="mt-2 text-sm text-slate-500">Termina a las {time(session.expires_at)}</div>
               </>
             )}
-            <Btn variant="sun" className="mt-4 w-full py-4 text-xl" onClick={() => run(() => finishSession(session.id), true)}>
-              ✓ ¡Listo, terminó!
+            <Btn variant="sun" className="mt-5 w-full py-3.5 text-base" onClick={() => run(() => finishSession(session.id), true)}>
+              ✓ Finalizar sesión
             </Btn>
           </div>
         </div>
@@ -79,10 +79,10 @@ export function SessionModal({ sessionId, onClose }: { sessionId: string; onClos
         {child?.age != null && <Info k="Edad" v={`${child.age} años`} />}
         {child?.guardian_name && <Info k="Acompañante" v={child.guardian_name} />}
         {child?.guardian_phone && (
-          <div className="rounded-2xl bg-mint-soft p-3">
-            <dt className="text-xs font-bold uppercase text-brand/50">Teléfono</dt>
+          <div className="rounded-2xl bg-canvas p-3">
+            <dt className="text-xs font-medium text-slate-500">Teléfono</dt>
             <dd>
-              <a className="font-bold text-brand underline" href={`tel:${child.guardian_phone}`}>{child.guardian_phone}</a>
+              <a className="font-semibold text-brand underline" href={`tel:${child.guardian_phone}`}>{child.guardian_phone}</a>
             </dd>
           </div>
         )}
@@ -90,16 +90,16 @@ export function SessionModal({ sessionId, onClose }: { sessionId: string; onClos
 
       {active && (
         <>
-          <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-500">Extender tiempo</h3>
+          <h3 className="mb-2 text-sm font-semibold text-ink">Extender tiempo</h3>
           <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {options.map((p) => (
               <button
                 key={p.id}
                 onClick={() => run(() => extendSession(session.id, p.duration_minutes, Number(p.price), method))}
-                className="rounded-[22px] border-2 border-brand-line bg-brand-soft px-3 py-3 text-center hover:border-brand"
+                className="rounded-2xl border border-line bg-white px-3 py-3 text-center transition hover:border-brand hover:bg-brand-soft"
               >
-                <div className="text-xl font-black text-brand">+{duration(p.duration_minutes)}</div>
-                <div className="text-sm font-semibold text-slate-500">{p.name} · {money(p.price, business?.currency)}</div>
+                <div className="text-lg font-bold text-brand">+{duration(p.duration_minutes)}</div>
+                <div className="text-xs text-slate-500">{p.name} · {money(p.price, business?.currency)}</div>
               </button>
             ))}
           </div>
@@ -126,9 +126,9 @@ export function SessionModal({ sessionId, onClose }: { sessionId: string; onClos
 
 function Info({ k, v }: { k: string; v: string }) {
   return (
-    <div className="rounded-2xl bg-mint-soft p-3">
-      <dt className="text-xs font-bold uppercase text-brand/50">{k}</dt>
-      <dd className="font-bold text-ink">{v}</dd>
+    <div className="rounded-2xl bg-canvas p-3">
+      <dt className="text-xs font-medium text-slate-500">{k}</dt>
+      <dd className="font-semibold text-ink">{v}</dd>
     </div>
   )
 }

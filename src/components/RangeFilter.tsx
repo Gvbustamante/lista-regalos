@@ -16,7 +16,7 @@ export function RangeFilter({ value, onChange, from, to, onFrom, onTo }: Props) 
         <button
           key={k}
           onClick={() => onChange(k)}
-          className={`rounded-full px-4 py-2 font-bold ${value === k ? 'bg-slate-800 text-white' : 'bg-white text-slate-600 shadow-sm'}`}
+          className={`rounded-full px-4 py-2 text-sm font-semibold ${value === k ? 'bg-ink text-white' : 'border border-line bg-white text-slate-600 hover:text-ink'}`}
         >
           {RANGE_LABELS[k]}
         </button>

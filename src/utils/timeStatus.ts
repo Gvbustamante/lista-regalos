@@ -11,14 +11,21 @@ export function timeLevel(remainingMs: number): TimeLevel {
 
 export const LEVEL_COLOR: Record<TimeLevel, string> = {
   green: '#22c55e',
-  yellow: '#ffe11c',
+  yellow: '#facc15',
   orange: '#fb923c',
   red: '#ef4444',
 }
 
-export const LEVEL_STYLES: Record<TimeLevel, { card: string; text: string; dot: string }> = {
-  green: { card: 'ring-emerald-300', text: 'text-brand', dot: 'bg-emerald-500' },
-  yellow: { card: 'ring-yellow-300', text: 'text-brand', dot: 'bg-yellow-400' },
-  orange: { card: 'ring-orange-400', text: 'text-orange-500', dot: 'bg-orange-500' },
-  red: { card: 'ring-red-400 animate-pulse-slow', text: 'text-red-500', dot: 'bg-red-500' },
+export const LEVEL_LABEL: Record<TimeLevel, string> = {
+  green: 'A tiempo',
+  yellow: 'Poco tiempo',
+  orange: 'Por vencer',
+  red: 'Terminado',
+}
+
+export const LEVEL_STYLES: Record<TimeLevel, { card: string; text: string; dot: string; badge: string }> = {
+  green: { card: 'border-line', text: 'text-ink', dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700' },
+  yellow: { card: 'border-line', text: 'text-ink', dot: 'bg-yellow-400', badge: 'bg-yellow-50 text-yellow-700' },
+  orange: { card: 'border-orange-300', text: 'text-orange-600', dot: 'bg-orange-500', badge: 'bg-orange-50 text-orange-700' },
+  red: { card: 'border-red-400 animate-pulse-slow', text: 'text-red-600', dot: 'bg-red-500', badge: 'bg-red-50 text-red-700' },
 }

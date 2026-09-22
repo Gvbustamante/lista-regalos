@@ -43,13 +43,13 @@ export function AlertWatcher() {
   return (
     <>
       {banner && (
-        <div className="fixed inset-x-3 top-3 z-40 mx-auto flex max-w-xl items-center gap-3 rounded-3xl bg-red-600 p-4 text-white shadow-2xl">
-          <span className="text-3xl">⏰</span>
-          <button className="flex-1 text-left" onClick={() => (setOpen(banner.id), setBanner(null))}>
-            <div className="text-lg font-black uppercase">{banner.name}</div>
-            <div className="text-sm font-semibold">Tiempo terminado · toca para gestionar</div>
+        <div role="alert" className="fixed inset-x-3 top-3 z-40 mx-auto flex max-w-lg items-center gap-3 rounded-2xl border border-red-200 bg-white p-3 pl-4 shadow-xl">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-red-50 text-2xl">⏰</span>
+          <button className="min-w-0 flex-1 text-left" onClick={() => (setOpen(banner.id), setBanner(null))}>
+            <div className="truncate font-bold text-ink">{banner.name}</div>
+            <div className="text-sm text-red-600">Tiempo terminado · toca para gestionar</div>
           </button>
-          <button onClick={() => setBanner(null)} className="grid size-10 place-items-center rounded-full bg-white/20" aria-label="Cerrar aviso">✕</button>
+          <button onClick={() => setBanner(null)} className="grid size-9 place-items-center rounded-full text-slate-400 hover:bg-canvas" aria-label="Cerrar aviso">✕</button>
         </div>
       )}
       {open && <SessionModal sessionId={open} onClose={() => setOpen(null)} />}

@@ -4,8 +4,8 @@ import { savePlan } from '../features/business/repo'
 import { usePlans } from '../hooks/useData'
 import type { Plan } from '../types'
 import { duration, money } from '../utils/format'
+import { inputCls } from '../components/ui'
 
-const input = 'w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2 outline-none focus:border-brand'
 
 type Draft = { id?: string; name: string; minutes: string; price: string; is_extension: boolean }
 
@@ -41,23 +41,23 @@ export function Plans() {
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-3xl font-black text-brand">Tarifas</h1>
+        <h1 className="text-2xl font-extrabold text-ink">Tarifas</h1>
         {canManage && (
-          <button onClick={() => edit()} className="rounded-2xl bg-brand px-5 py-3 font-black text-white">+ Nuevo plan</button>
+          <button onClick={() => edit()} className="rounded-2xl bg-brand px-5 py-3 font-extrabold text-white">+ Nuevo plan</button>
         )}
       </div>
       {!canManage && <p className="mb-4 rounded-2xl bg-slate-100 p-3 text-slate-600">Solo el dueño o un administrador puede cambiar tarifas.</p>}
 
       {draft && (
-        <div className="mb-5 grid gap-3 rounded-[28px] bg-mint p-5 sm:grid-cols-[2fr_1fr_1fr]">
-          <label className="grid gap-1 text-sm font-bold text-slate-500">Nombre
-            <input className={input} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} autoFocus />
+        <div className="mb-5 grid gap-3 rounded-3xl bg-white border border-line shadow-card p-5 sm:grid-cols-[2fr_1fr_1fr]">
+          <label className="grid gap-1.5 text-sm font-medium text-slate-600">Nombre
+            <input className={inputCls} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} autoFocus />
           </label>
-          <label className="grid gap-1 text-sm font-bold text-slate-500">Minutos
-            <input className={input} inputMode="numeric" value={draft.minutes} onChange={(e) => setDraft({ ...draft, minutes: e.target.value.replace(/\D/g, '') })} />
+          <label className="grid gap-1.5 text-sm font-medium text-slate-600">Minutos
+            <input className={inputCls} inputMode="numeric" value={draft.minutes} onChange={(e) => setDraft({ ...draft, minutes: e.target.value.replace(/\D/g, '') })} />
           </label>
-          <label className="grid gap-1 text-sm font-bold text-slate-500">Precio
-            <input className={input} inputMode="numeric" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value.replace(/[^\d.]/g, '') })} />
+          <label className="grid gap-1.5 text-sm font-medium text-slate-600">Precio
+            <input className={inputCls} inputMode="numeric" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value.replace(/[^\d.]/g, '') })} />
           </label>
           <label className="flex items-center gap-2 font-semibold text-slate-700 sm:col-span-3">
             <input type="checkbox" className="size-5" checked={draft.is_extension} onChange={(e) => setDraft({ ...draft, is_extension: e.target.checked })} />
@@ -65,13 +65,13 @@ export function Plans() {
           </label>
           {error && <p className="font-semibold text-red-600 sm:col-span-3">{error}</p>}
           <div className="flex gap-2 sm:col-span-3">
-            <button onClick={save} className="rounded-2xl bg-emerald-500 px-5 py-3 font-black text-white">Guardar</button>
+            <button onClick={save} className="rounded-2xl bg-emerald-500 px-5 py-3 font-extrabold text-white">Guardar</button>
             <button onClick={() => (setDraft(null), setError(''))} className="rounded-2xl bg-slate-100 px-5 py-3 font-bold text-slate-600">Cancelar</button>
           </div>
         </div>
       )}
 
-      <div className="overflow-hidden rounded-[28px] bg-mint">
+      <div className="overflow-hidden rounded-3xl bg-white border border-line shadow-card">
         <table className="w-full text-left">
           <thead className="bg-slate-50 text-xs uppercase text-slate-400">
             <tr>
