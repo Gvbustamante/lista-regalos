@@ -313,3 +313,11 @@ begin
 end $$;
 revoke all on function public.playtime_admin_overview() from public, anon;
 grant execute on function public.playtime_admin_overview() to authenticated;
+
+-- Funciones internas: no expuestas por la API
+revoke execute on function public.playtime_enforce_session_limit() from public, anon, authenticated;
+revoke execute on function public.playtime_enforce_member_limit() from public, anon, authenticated;
+revoke execute on function public.playtime_limit(uuid, text) from authenticated;
+revoke execute on function public.playtime_used(uuid, text) from authenticated;
+revoke execute on function public.playtime_month_start(uuid) from authenticated;
+revoke execute on function public.playtime_root(uuid) from authenticated;
