@@ -134,9 +134,9 @@ async function pull(t: (typeof TABLES)[number], bid: string) {
     await db.transaction('rw', table, async () => {
       for (const r of rows) {
         const local = await table.get(r.id as string)
-        const localNewer =
-          local?._dirty === 1 && Date.parse(local.updated_at as string) > Date.parse(r.updated_at as string)
-        if (!localNewer) await table.put({ ...r, _dirty: 0 })
+        if (local?._dirty === 1 && Date.parse(local.updated_at as string) > Date.parse(r.updated_at as string)) continue
+        if (local && local._dirty !== 1 && local.synced_at === r.synced_at) continue // sin cambios
+        await table.put({ ...r, _dirty: 0 })
       }
     })
 
@@ -167,15 +167,21 @@ async function run() {
       pushed += await push(t)
       set({ progress: Math.round((++step / steps) * 100) })
     }
-    for (const t of TABLES) {
-      await pull(t, bid)
-      set({ progress: Math.round((++step / steps) * 100) })
-    }
+    // Las descargas no dependen entre sí: se hacen en paralelo (el negocio primero para mostrar la sede cuanto antes)
+    await pull(TABLES[0], bid)
+    set({ progress: Math.round((++step / steps) * 100) })
+    await Promise.all(
+      TABLES.slice(1).map((t) =>
+        pull(t, bid).then(() => set({ progress: Math.round((++step / steps) * 100) })),
+      ),
+    )
     set({ lastSyncAt: new Date().toISOString(), lastSynced: pushed })
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
-    set({ error: friendlyLimitError(msg) ?? (/fetch|network/i.test(msg) ? 'Sin conexión con el servidor' : msg) })
+    set({ error: friendlyLimitError(msg) ?? (/fetch|network|abort|tiempo de espera/i.test(msg) ? 'Sin conexión con el servidor' : msg) })
   } finally {
+    // Si el usuario cambió de sede mientras sincronizaba, repetir para la nueva
+    if (businessId && businessId !== bid) again = true
     set({ syncing: false })
     await countPending()
   }
@@ -210,32 +216,48 @@ const onOnline = () => {
 }
 const onOffline = () => set({ online: false })
 
+let generation = 0
+
 export function startSync(bid: string) {
+  if (businessId === bid && interval) {
+    // ya está corriendo para este negocio: solo sincronizar
+    void syncNow()
+    return
+  }
   stopSync()
+  const gen = ++generation
   businessId = bid
   window.addEventListener('online', onOnline)
   window.addEventListener('offline', onOffline)
   interval = setInterval(() => void syncNow(), 30000)
-
-  // Tiempo real: cambios de otros dispositivos disparan un pull
-  channel = supabase.channel(`playtime-${bid}`)
-  for (const t of TABLES) {
-    channel.on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: t.remote, filter: t.local === 'businesses' ? `id=eq.${bid}` : `business_id=eq.${bid}` },
-      () => requestSync(),
-    )
-  }
-  channel.subscribe()
+  // Primero sincronizar: el tiempo real es un extra y nunca debe impedir la descarga
   void syncNow()
+
+  try {
+    // Nombre único por arranque: evita reusar un canal que aún se está cerrando
+    const ch = supabase.channel(`playtime-${bid}-${gen}`)
+    for (const t of TABLES) {
+      ch.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: t.remote, filter: t.local === 'businesses' ? `id=eq.${bid}` : `business_id=eq.${bid}` },
+        () => requestSync(),
+      )
+    }
+    ch.subscribe()
+    channel = ch
+  } catch (e) {
+    console.warn('Realtime no disponible', e)
+  }
 }
 
 export function stopSync() {
   window.removeEventListener('online', onOnline)
   window.removeEventListener('offline', onOffline)
   if (interval) clearInterval(interval)
-  if (channel) void supabase.removeChannel(channel)
+  if (debounce) clearTimeout(debounce)
+  if (channel) void supabase.removeChannel(channel).catch(() => {})
   interval = null
+  debounce = null
   channel = null
   businessId = null
 }

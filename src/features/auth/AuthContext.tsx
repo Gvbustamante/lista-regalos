@@ -1,6 +1,6 @@
 import type { User } from '@supabase/supabase-js'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { clearLocalData, db, getMeta, setMeta } from '../../database/local/db'
 import { supabase, T } from '../../database/supabase/client'
 import type { Business, Membership, MyBusiness, Role } from '../../types'
@@ -59,6 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [needsOnline, setNeedsOnline] = useState(false)
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
   const [businesses, setBusinesses] = useState<MyBusiness[]>([])
+  const businessesRef = useRef<MyBusiness[]>([])
+  businessesRef.current = businesses
 
   const business =
     useLiveQuery(() => (membership ? db.businesses.get(membership.business_id) : undefined), [membership?.business_id]) ??
@@ -93,33 +95,70 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false)
   }, [])
 
+  // Solo re-resolver cuando cambia la persona (evita reinicios dobles por eventos repetidos de Supabase)
+  const lastUserId = useRef<string | null | undefined>(undefined)
+  const resolveOnce = useCallback(
+    (u: User | null) => {
+      const id = u?.id ?? null
+      if (lastUserId.current === id) return
+      lastUserId.current = id
+      void resolve(u)
+    },
+    [resolve],
+  )
+
   useEffect(() => {
     // getSession lee localStorage: funciona sin internet
-    supabase.auth.getSession().then(({ data }) => resolve(data.session?.user ?? null))
+    supabase.auth.getSession().then(({ data }) => resolveOnce(data.session?.user ?? null))
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') void resolve(session?.user ?? null)
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
+        // no llamar a Supabase dentro del callback (recomendación de supabase-js): diferir
+        setTimeout(() => resolveOnce(session?.user ?? null), 0)
+      }
     })
     return () => data.subscription.unsubscribe()
-  }, [resolve])
+  }, [resolveOnce])
 
   // Primer ingreso sin internet: reintentar al volver la conexión
   useEffect(() => {
     if (!needsOnline) return
-    const retry = () => supabase.auth.getSession().then(({ data }) => resolve(data.session?.user ?? null))
+    const retry = () => {
+      lastUserId.current = undefined
+      return supabase.auth.getSession().then(({ data }) => resolveOnce(data.session?.user ?? null))
+    }
     window.addEventListener('online', retry)
     return () => window.removeEventListener('online', retry)
-  }, [needsOnline, resolve])
+  }, [needsOnline, resolveOnce])
 
+  // Depende del id (texto), no del objeto: no reinicia la sincronización por renders
+  const activeBusinessId = membership?.business_id ?? null
   useEffect(() => {
-    if (!membership) return
-    startSync(membership.business_id)
-    return () => stopSync()
-  }, [membership])
+    if (!activeBusinessId) return
+    startSync(activeBusinessId)
+  }, [activeBusinessId])
+  useEffect(() => () => stopSync(), [])
 
   const switchBusiness = async (id: string) => {
     if (!user) return
-    const b = businesses.find((x) => x.id === id)
-    if (!b) return
+    let b = businessesRef.current.find((x) => x.id === id)
+    if (!b) {
+      // lista desactualizada (p. ej. sede recién creada): recargar
+      const list = await loadMemberships(user)
+      if (list !== 'offline') {
+        setBusinesses(list)
+        b = list.find((x) => x.id === id)
+      }
+    }
+    if (!b || id === membership?.business_id) return
+    // Trae la ficha de la sede antes de cambiar, para que la pantalla no quede esperando
+    if (!(await db.businesses.get(id))) {
+      if (!navigator.onLine) throw new Error('Necesitas internet para abrir esta sede por primera vez en este dispositivo.')
+      const { data, error } = await supabase.from(T.businesses).select('*').eq('id', id).single()
+      if (error || !data) throw new Error(error?.message ?? 'No se pudo abrir la sede')
+      const row = data as Record<string, unknown>
+      for (const k in row) if (k.endsWith('_at') && typeof row[k] === 'string') row[k] = new Date(row[k] as string).toISOString()
+      await db.businesses.put({ ...(row as unknown as Business), _dirty: 0 })
+    }
     await setMeta(`current:${user.id}`, id)
     setMembership({ business_id: id, user_id: user.id, role: b.role })
   }

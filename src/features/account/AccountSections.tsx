@@ -91,7 +91,7 @@ export function BranchesSection() {
     await refresh()
     if (data && confirm('Sede creada. ¿Quieres cambiarte a ella ahora?')) {
       // la lista se recargó; cambiar tras el render
-      setTimeout(() => void switchBusiness(data as string), 50)
+      setTimeout(() => switchBusiness(data as string).catch((err: Error) => setMsg(err.message)), 50)
     }
   }
 
@@ -108,7 +108,7 @@ export function BranchesSection() {
             {b.id === membership?.business_id ? (
               <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs font-semibold text-brand">Actual</span>
             ) : (
-              <button onClick={() => switchBusiness(b.id)} className="rounded-xl px-3 py-1.5 text-sm font-semibold text-brand hover:bg-brand-soft">Cambiar</button>
+              <button onClick={() => switchBusiness(b.id).catch((err: Error) => setMsg(err.message))} className="rounded-xl px-3 py-1.5 text-sm font-semibold text-brand hover:bg-brand-soft">Cambiar</button>
             )}
           </li>
         ))}
@@ -134,11 +134,12 @@ export function TeamSection() {
   const [msg, setMsg] = useState('')
   const isOwner = membership?.role === 'owner'
 
+  const businessId = business?.id
   const load = useCallback(async () => {
-    if (!business || !navigator.onLine) return
-    const { data } = await supabase.from(T.members).select('*').eq('business_id', business.id).order('created_at')
+    if (!businessId || !navigator.onLine) return
+    const { data } = await supabase.from(T.members).select('business_id, user_id, name, email, role, created_at').eq('business_id', businessId).order('created_at')
     setMembers((data ?? []) as MemberRow[])
-  }, [business])
+  }, [businessId])
   useEffect(() => void load(), [load])
 
   const act = async (fn: () => PromiseLike<{ error: { message: string } | null }>) => {
@@ -218,7 +219,7 @@ export function DevicesSection() {
 
   const load = useCallback(async () => {
     if (!rootId || !navigator.onLine) return
-    const { data } = await supabase.from('playtime_devices').select('*').eq('root_id', rootId).order('last_seen_at', { ascending: false })
+    const { data } = await supabase.from('playtime_devices').select('id, root_id, business_id, name, last_seen_at, created_at').eq('root_id', rootId).order('last_seen_at', { ascending: false })
     setDevices((data ?? []) as Device[])
   }, [rootId])
   useEffect(() => void load(), [load])

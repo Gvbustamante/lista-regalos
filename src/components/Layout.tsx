@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
 import { dateLong } from '../utils/format'
@@ -56,7 +57,7 @@ export function Layout() {
               <select
                 aria-label="Cambiar de sede"
                 value={business.id}
-                onChange={(e) => void switchBusiness(e.target.value)}
+                onChange={(e) => switchBusiness(e.target.value).catch((err: Error) => alert(err.message))}
                 className="-ml-1 max-w-[60vw] truncate rounded-lg bg-transparent px-1 py-0.5 text-base font-bold text-ink outline-none hover:bg-canvas"
               >
                 {businesses.map((b) => (
@@ -73,7 +74,9 @@ export function Layout() {
           <SyncBadge />
         </header>
         <main className="flex-1 p-4 md:p-8">
-          <Outlet />
+          <Suspense fallback={<div className="grid min-h-[40vh] place-items-center text-sm text-slate-400">Cargando…</div>}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
 
