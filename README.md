@@ -1,6 +1,6 @@
-# PlayTime Manager
+# Full Time
 
-Sistema **offline-first** para mini parques infantiles. Registra entradas y pagos, controla el tiempo de cada niño, avisa cuando se vence y muestra quién está dentro y cuánto le queda. Diseñado primero para tablet.
+**Full Time** (antes PlayTime Manager): sistema **offline-first** para mini parques infantiles. Registra entradas y pagos, controla el tiempo de cada niño, avisa cuando se vence y muestra quién está dentro y cuánto le queda. Diseñado primero para tablet.
 
 ## Funciones (V1)
 

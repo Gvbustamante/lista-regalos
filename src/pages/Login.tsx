@@ -28,8 +28,8 @@ export function Login() {
     <div className="grid min-h-dvh place-items-center bg-canvas p-4">
       <form onSubmit={submit} className="grid w-full max-w-md gap-4 rounded-3xl border border-line bg-white p-8 shadow-card">
         <div className="text-center">
-          <img src="/icon.svg" alt="" className="mx-auto size-20" />
-          <h1 className="mt-2 text-2xl font-extrabold text-ink">PlayTime</h1>
+          <img src="/logo.webp" alt="Full Time" className="mx-auto h-44 w-auto" />
+          <h1 className="sr-only">Full Time</h1>
           <p className="text-slate-500">Control de tiempo para mini parques</p>
         </div>
         <input className={inputCls} type="email" required placeholder="Correo" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />

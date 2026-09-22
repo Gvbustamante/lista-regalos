@@ -14,7 +14,7 @@ const TEXT: Record<BlockReason, { title: string; body: (n: number | null, exp: s
   },
   suspended: {
     title: 'Cuenta suspendida',
-    body: () => 'Tu cuenta está suspendida. Comunícate con PlayTime para reactivarla.',
+    body: () => 'Tu cuenta está suspendida. Comunícate con Full Time para reactivarla.',
   },
 }
 
@@ -56,7 +56,7 @@ export function LimitModal({ reason, onClose }: { reason: BlockReason; onClose: 
               Enviar correo
             </a>
           )}
-          {!links.whatsapp && !links.email && <p className="text-sm text-slate-500 sm:col-span-2">Comunícate con PlayTime para activar tu cambio.</p>}
+          {!links.whatsapp && !links.email && <p className="text-sm text-slate-500 sm:col-span-2">Comunícate con Full Time para activar tu cambio.</p>}
         </div>
       </div>
     </Modal>

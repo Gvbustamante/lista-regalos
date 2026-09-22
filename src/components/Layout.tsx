@@ -25,9 +25,9 @@ export function Layout() {
   return (
     <div className="flex min-h-dvh bg-canvas" onPointerDown={unlockAudio}>
       <aside className="sticky top-0 hidden h-dvh w-20 shrink-0 flex-col gap-1 border-r border-line bg-white px-2 py-4 md:flex lg:w-60 lg:px-3">
-        <div className="mb-6 flex items-center justify-center gap-2.5 lg:justify-start lg:px-2">
-          <img src="/icon.svg" alt="" className="size-9" />
-          <span className="hidden text-lg font-extrabold tracking-tight text-ink lg:inline">PlayTime</span>
+        <div className="mb-4 flex items-center justify-center gap-2.5 lg:px-2">
+          <img src="/mark.png" alt="" className="size-10 object-contain lg:hidden" />
+          <img src="/logo.webp" alt="Full Time" className="hidden h-24 w-auto object-contain lg:block" />
         </div>
         {NAV.map((n) => (
           <NavLink key={n.to} to={n.to} end={n.to === '/'} className={({ isActive }) => side(isActive)}>
@@ -66,7 +66,7 @@ export function Layout() {
                 ))}
               </select>
             ) : (
-              <div className="truncate text-base font-bold text-ink">{business?.name ?? 'PlayTime'}</div>
+              <div className="truncate text-base font-bold text-ink">{business?.name ?? 'Full Time'}</div>
             )}
             <div className="text-xs text-slate-500 first-letter:uppercase">{dateLong()}</div>
           </div>

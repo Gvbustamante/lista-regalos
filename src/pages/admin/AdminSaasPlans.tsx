@@ -204,7 +204,7 @@ function PlatformAdmins() {
         <input type="email" required className={`${inputCls} min-w-52 flex-1`} placeholder="correo@ejemplo.com" value={email} onChange={(e) => setEmail(e.target.value)} />
         <Btn type="submit">Agregar</Btn>
       </form>
-      <p className="text-xs text-slate-500">La persona entra con su propia cuenta de PlayTime (correo confirmado) y verá el panel en /admin.</p>
+      <p className="text-xs text-slate-500">La persona entra con su propia cuenta de Full Time (correo confirmado) y verá el panel en /admin.</p>
       {msg && <p className="text-sm font-semibold text-red-600">{msg}</p>}
     </section>
   )

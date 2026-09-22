@@ -25,7 +25,7 @@ function Gate() {
   if (!business) return <Splash text="Descargando datos del negocio…" />
   if (business.status === 'suspended')
     return (
-      <Splash text={`La cuenta de "${business.name}" está suspendida. Comunícate con PlayTime para reactivarla.`}>
+      <Splash text={`La cuenta de "${business.name}" está suspendida. Comunícate con Full Time para reactivarla.`}>
         {isPlatformAdmin && <a href="/admin" className="mt-4 inline-block font-extrabold text-brand underline">Ir al panel admin</a>}
       </Splash>
     )
@@ -73,7 +73,7 @@ function Splash({ text, children }: { text: string; children?: React.ReactNode }
   return (
     <div className="grid min-h-dvh place-items-center bg-canvas p-6 text-center">
       <div>
-        <img src="/icon.svg" alt="" className="mx-auto size-20 animate-pulse" />
+        <img src="/logo.webp" alt="Full Time" className="mx-auto h-40 w-auto animate-pulse" />
         <p className="mx-auto mt-4 max-w-md text-lg font-semibold text-ink">{text}</p>
         {children}
       </div>
