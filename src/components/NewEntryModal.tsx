@@ -9,8 +9,9 @@ import { duration, money } from '../utils/format'
 import { unlockAudio } from '../utils/sound'
 import { Modal } from './Modal'
 import { PaymentPicker } from './PaymentPicker'
+import { Btn } from './ui'
 
-const input = 'w-full rounded-2xl border-2 border-slate-200 bg-white px-4 py-3 text-lg outline-none focus:border-amber-500'
+const input = 'w-full rounded-2xl border-2 border-slate-200 bg-white px-4 py-3 text-lg outline-none focus:border-brand'
 const label = 'mb-1 block text-sm font-bold uppercase tracking-wide text-slate-500'
 
 export function NewEntryModal({ onClose }: { onClose: () => void }) {
@@ -106,7 +107,7 @@ export function NewEntryModal({ onClose }: { onClose: () => void }) {
               <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-lg">
                 {suggestions.map((c) => (
                   <li key={c.id}>
-                    <button type="button" onClick={() => pickChild(c.id)} className="flex w-full justify-between px-4 py-3 text-left hover:bg-amber-50">
+                    <button type="button" onClick={() => pickChild(c.id)} className="flex w-full justify-between px-4 py-3 text-left hover:bg-brand-soft">
                       <span className="font-bold">{c.name}</span>
                       <span className="text-sm text-slate-500">{[c.age && `${c.age} años`, c.guardian_name].filter(Boolean).join(' · ')}</span>
                     </button>
@@ -138,7 +139,7 @@ export function NewEntryModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 key={p.id}
                 onClick={() => selectPlan(p.id)}
-                className={`rounded-2xl border-4 px-3 py-4 text-center ${planId === p.id ? 'border-amber-500 bg-amber-100' : 'border-slate-200 bg-white'}`}
+                className={`rounded-[22px] border-4 px-3 py-4 text-center text-brand ${planId === p.id ? 'border-brand bg-brand-soft' : 'border-mint-dark bg-mint-soft'}`}
               >
                 <div className="text-xl font-black">{duration(p.duration_minutes).toUpperCase()}</div>
                 <div className="text-sm font-semibold text-slate-500">{p.name} · {money(p.price, business?.currency)}</div>
@@ -147,7 +148,7 @@ export function NewEntryModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={() => selectPlan('custom')}
-              className={`rounded-2xl border-4 px-3 py-4 text-center ${planId === 'custom' ? 'border-amber-500 bg-amber-100' : 'border-slate-200 bg-white'}`}
+              className={`rounded-[22px] border-4 px-3 py-4 text-center text-brand ${planId === 'custom' ? 'border-brand bg-brand-soft' : 'border-mint-dark bg-mint-soft'}`}
             >
               <div className="text-xl font-black">PERSONALIZADO</div>
               <div className="text-sm font-semibold text-slate-500">Minutos a elección</div>
@@ -174,9 +175,9 @@ export function NewEntryModal({ onClose }: { onClose: () => void }) {
 
         {error && <p className="rounded-2xl bg-red-50 px-4 py-3 font-semibold text-red-600">{error}</p>}
 
-        <button disabled={saving} className="rounded-3xl bg-emerald-500 py-5 text-2xl font-black text-white shadow-lg hover:bg-emerald-600 disabled:opacity-50">
-          ▶ INICIAR TIEMPO
-        </button>
+        <Btn variant="sun" disabled={saving} className="py-5 text-2xl">
+          ▶ Iniciar tiempo
+        </Btn>
       </form>
     </Modal>
   )

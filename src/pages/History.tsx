@@ -39,7 +39,7 @@ export function History() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="mb-4 text-3xl font-black text-slate-800">Historial</h1>
+      <h1 className="mb-4 text-3xl font-black text-brand">Historial</h1>
       <RangeFilter value={r.key} onChange={r.setKey} from={r.from} to={r.to} onFrom={r.setFrom} onTo={r.setTo} />
 
       <div className="mb-5 grid grid-cols-3 gap-3">
@@ -48,14 +48,14 @@ export function History() {
         <Stat label="Ingresos" value={money(sum.income, business?.currency)} tone="emerald" />
       </div>
 
-      <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-[28px] bg-mint">
         {rows.length === 0 ? (
           <p className="p-10 text-center font-semibold text-slate-400">Sin entradas en este periodo</p>
         ) : (
           <ul className="divide-y divide-slate-100">
             {rows.map(({ s, paid, exts, minutes }) => (
               <li key={s.id}>
-                <button onClick={() => setOpenId(s.id)} className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 text-left hover:bg-amber-50 sm:grid-cols-[6rem_1fr_7rem_7rem_8rem_7rem]">
+                <button onClick={() => setOpenId(s.id)} className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 text-left hover:bg-brand-soft sm:grid-cols-[6rem_1fr_7rem_7rem_8rem_7rem]">
                   <span className="font-mono font-bold text-slate-500">
                     {multiDay && <span className="block text-xs">{dateShort(s.started_at)}</span>}
                     {time(s.started_at)}

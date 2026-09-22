@@ -1,7 +1,18 @@
 @import 'tailwindcss';
 
+/* Estilo PlayTime: menta + morado + amarillo sol */
 @theme {
   --font-sans: 'Nunito', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
+  --color-brand: #8b1fe8;
+  --color-brand-dark: #6c12bd;
+  --color-brand-soft: #f1e6fe;
+  --color-brand-line: #cfaef8;
+  --color-mint: #d5efe1;
+  --color-mint-soft: #ebf8f1;
+  --color-mint-dark: #b9e2cc;
+  --color-sun: #ffe11c;
+  --color-sun-dark: #f0b400;
+  --color-ink: #262a5a;
   --animate-pulse-slow: pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -9,6 +20,7 @@ html,
 body {
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
+  color: var(--color-ink);
 }
 
 button {

@@ -6,5 +6,5 @@ import { useActiveSessions } from '../hooks/useData'
 export function PublicScreen() {
   const { business } = useAuth()
   const sessions = useActiveSessions(business?.id)
-  return <PublicBoard title={business?.name ?? ''} items={sessions.map(({ id, child_name, expires_at }) => ({ id, child_name, expires_at }))} />
+  return <PublicBoard title={business?.name ?? ''} items={sessions.map(({ id, child_name, started_at, expires_at }) => ({ id, child_name, started_at, expires_at }))} />
 }

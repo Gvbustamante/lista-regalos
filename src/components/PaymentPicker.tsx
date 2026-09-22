@@ -9,7 +9,7 @@ export function PaymentPicker({ value, onChange }: { value: PaymentMethod; onCha
           type="button"
           key={m.value}
           onClick={() => onChange(m.value)}
-          className={`rounded-2xl border-2 px-2 py-3 text-sm font-bold ${value === m.value ? 'border-amber-500 bg-amber-100 text-amber-900' : 'border-slate-200 bg-white text-slate-600'}`}
+          className={`rounded-full border-2 px-2 py-3 text-sm font-bold ${value === m.value ? 'border-brand bg-brand text-white' : 'border-mint-dark bg-mint-soft text-slate-600'}`}
         >
           {m.label}
         </button>

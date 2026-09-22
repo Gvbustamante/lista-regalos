@@ -3,6 +3,7 @@ import { NewEntryModal } from '../components/NewEntryModal'
 import { SessionCard } from '../components/SessionCard'
 import { SessionModal } from '../components/SessionModal'
 import { Stat } from '../components/Stat'
+import { Btn } from '../components/ui'
 import { useAuth } from '../features/auth/AuthContext'
 import { summarize } from '../features/sessions/stats'
 import { useActiveSessions, usePlans, useRangeData } from '../hooks/useData'
@@ -38,20 +39,17 @@ export function Dashboard() {
         <Stat label="Ingresos hoy" value={money(today.income, business?.currency)} tone="emerald" />
       </div>
 
-      <button
-        onClick={() => setNewOpen(true)}
-        className="mb-6 w-full rounded-3xl bg-amber-500 py-5 text-2xl font-black text-white shadow-lg shadow-amber-200 hover:bg-amber-600 active:scale-[0.99]"
-      >
-        + NUEVA ENTRADA
-      </button>
+      <Btn variant="sun" onClick={() => setNewOpen(true)} className="mb-6 w-full py-5 text-2xl">
+        + Nueva entrada
+      </Btn>
 
       {sorted.length === 0 ? (
-        <div className="rounded-3xl border-4 border-dashed border-amber-200 p-12 text-center">
+        <div className="rounded-[28px] border-4 border-dashed border-mint-dark bg-mint-soft p-12 text-center">
           <div className="text-6xl">🛝</div>
           <p className="mt-3 text-xl font-bold text-slate-500">No hay niños en el parque</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {sorted.map((s) => (
             <SessionCard key={s.id} session={s} now={now} plan={s.plan_id ? planById.get(s.plan_id) : undefined} onClick={() => setOpenId(s.id)} />
           ))}

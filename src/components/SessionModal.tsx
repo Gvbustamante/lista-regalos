@@ -7,7 +7,8 @@ import { usePlans } from '../hooks/useData'
 import { useNow } from '../hooks/useNow'
 import type { PaymentMethod } from '../types'
 import { countdown, duration, money, paymentLabel, time } from '../utils/format'
-import { LEVEL_STYLES, timeLevel } from '../utils/timeStatus'
+import { LEVEL_COLOR, LEVEL_STYLES, timeLevel } from '../utils/timeStatus'
+import { Btn, Ring } from './ui'
 import { Modal } from './Modal'
 import { PaymentPicker } from './PaymentPicker'
 
@@ -29,6 +30,8 @@ export function SessionModal({ sessionId, onClose }: { sessionId: string; onClos
   const remaining = Date.parse(session.expires_at) - now
   const level = timeLevel(remaining)
   const active = session.status === 'active'
+  const start = Date.parse(session.started_at)
+  const elapsed = Math.min(1, Math.max(0, (now - start) / (Date.parse(session.expires_at) - start)))
   const paid = payments.reduce((a, p) => a + Number(p.amount), 0)
 
   const run = async (fn: () => Promise<void>, close = false) => {
@@ -44,18 +47,27 @@ export function SessionModal({ sessionId, onClose }: { sessionId: string; onClos
   return (
     <Modal title={session.child_name} onClose={onClose} wide>
       {active && (
-        <div className={`mb-5 rounded-3xl border-4 p-4 text-center ${LEVEL_STYLES[level].card}`}>
-          {level === 'red' ? (
-            <>
-              <div className="text-3xl font-black text-red-600">🔴 TIEMPO TERMINADO</div>
-              <div className="font-semibold text-red-500">Su tiempo terminó a las {time(session.expires_at)}</div>
-            </>
-          ) : (
-            <>
-              <div className={`font-mono text-6xl font-black tabular-nums ${LEVEL_STYLES[level].text}`}>{countdown(remaining)}</div>
-              <div className="font-semibold text-slate-600">Termina a las {time(session.expires_at)}</div>
-            </>
-          )}
+        <div className="mb-5 flex flex-col items-center gap-5 rounded-[28px] bg-mint p-5 sm:flex-row sm:justify-center sm:gap-10">
+          <Ring progress={1 - elapsed} color={LEVEL_COLOR[level]} size={170} stroke={22}>
+            <span className="text-7xl" aria-hidden>{level === 'red' ? '⏰' : '🧒'}</span>
+          </Ring>
+          <div className="text-center sm:text-left">
+            {level === 'red' ? (
+              <>
+                <div className="text-3xl font-black text-red-500">¡Tiempo terminado!</div>
+                <div className="font-bold text-red-400">Terminó a las {time(session.expires_at)}</div>
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-black text-brand/70">{session.child_name}</div>
+                <div className={`text-7xl font-black tabular-nums leading-none ${LEVEL_STYLES[level].text}`}>{countdown(remaining)}</div>
+                <div className="mt-1 font-bold text-slate-500">Termina a las {time(session.expires_at)}</div>
+              </>
+            )}
+            <Btn variant="sun" className="mt-4 w-full py-4 text-xl" onClick={() => run(() => finishSession(session.id), true)}>
+              ✓ ¡Listo, terminó!
+            </Btn>
+          </div>
         </div>
       )}
 
@@ -67,10 +79,10 @@ export function SessionModal({ sessionId, onClose }: { sessionId: string; onClos
         {child?.age != null && <Info k="Edad" v={`${child.age} años`} />}
         {child?.guardian_name && <Info k="Acompañante" v={child.guardian_name} />}
         {child?.guardian_phone && (
-          <div className="rounded-2xl bg-slate-50 p-3">
-            <dt className="text-xs font-bold uppercase text-slate-400">Teléfono</dt>
+          <div className="rounded-2xl bg-mint-soft p-3">
+            <dt className="text-xs font-bold uppercase text-brand/50">Teléfono</dt>
             <dd>
-              <a className="font-bold text-sky-600 underline" href={`tel:${child.guardian_phone}`}>{child.guardian_phone}</a>
+              <a className="font-bold text-brand underline" href={`tel:${child.guardian_phone}`}>{child.guardian_phone}</a>
             </dd>
           </div>
         )}
@@ -84,9 +96,9 @@ export function SessionModal({ sessionId, onClose }: { sessionId: string; onClos
               <button
                 key={p.id}
                 onClick={() => run(() => extendSession(session.id, p.duration_minutes, Number(p.price), method))}
-                className="rounded-2xl border-4 border-sky-200 bg-sky-50 px-3 py-3 text-center hover:border-sky-400"
+                className="rounded-[22px] border-2 border-brand-line bg-brand-soft px-3 py-3 text-center hover:border-brand"
               >
-                <div className="text-xl font-black text-sky-800">+{duration(p.duration_minutes)}</div>
+                <div className="text-xl font-black text-brand">+{duration(p.duration_minutes)}</div>
                 <div className="text-sm font-semibold text-slate-500">{p.name} · {money(p.price, business?.currency)}</div>
               </button>
             ))}
@@ -97,20 +109,15 @@ export function SessionModal({ sessionId, onClose }: { sessionId: string; onClos
 
           {error && <p className="mb-3 rounded-2xl bg-red-50 px-4 py-3 font-semibold text-red-600">{error}</p>}
 
-          <div className="grid gap-3 sm:grid-cols-[2fr_1fr]">
-            <button onClick={() => run(() => finishSession(session.id), true)} className="rounded-3xl bg-slate-800 py-4 text-xl font-black text-white hover:bg-slate-900">
-              ✓ FINALIZAR SESIÓN
-            </button>
-            {confirmCancel ? (
-              <button onClick={() => run(() => cancelSession(session.id), true)} className="rounded-3xl bg-red-600 py-4 font-black text-white">
-                ¿Seguro? Anular
-              </button>
-            ) : (
-              <button onClick={() => setConfirmCancel(true)} className="rounded-3xl border-2 border-red-200 py-4 font-bold text-red-600">
-                Anular entrada
-              </button>
-            )}
-          </div>
+          {confirmCancel ? (
+            <Btn variant="danger" className="w-full" onClick={() => run(() => cancelSession(session.id), true)}>
+              ¿Seguro? Anular entrada
+            </Btn>
+          ) : (
+            <Btn variant="outline" className="w-full" onClick={() => setConfirmCancel(true)}>
+              Anular entrada
+            </Btn>
+          )}
         </>
       )}
     </Modal>
@@ -119,9 +126,9 @@ export function SessionModal({ sessionId, onClose }: { sessionId: string; onClos
 
 function Info({ k, v }: { k: string; v: string }) {
   return (
-    <div className="rounded-2xl bg-slate-50 p-3">
-      <dt className="text-xs font-bold uppercase text-slate-400">{k}</dt>
-      <dd className="font-bold text-slate-800">{v}</dd>
+    <div className="rounded-2xl bg-mint-soft p-3">
+      <dt className="text-xs font-bold uppercase text-brand/50">{k}</dt>
+      <dd className="font-bold text-ink">{v}</dd>
     </div>
   )
 }

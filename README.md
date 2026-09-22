@@ -17,6 +17,31 @@ Sistema **offline-first** para mini parques infantiles. Registra entradas y pago
 - Modo offline completo, con sincronización automática al volver internet.
 - Roles: dueño, administrador y empleado. La seguridad se aplica en la base de datos (RLS).
 
+## Panel de administración de la plataforma (`/admin`)
+
+Solo para las cuentas de `playtime_platform_admins`. Hoy está registrada `gvbustamante02@gmail.com`, y el correo debe estar confirmado.
+
+- **Negocios**: todos los negocios registrados, con buscador y filtros por plan o suspendidos. Por cada uno:
+  - niños en el parque;
+  - sesiones del mes contra el límite del plan;
+  - ventas;
+  - cuentas.
+- **Detalle de un negocio**:
+  - editar sus datos;
+  - asignar el plan SaaS y la fecha de vencimiento;
+  - notas internas (solo las ve el admin);
+  - suspender o reactivar. Un negocio suspendido pierde el acceso a sus datos.
+- **Cuentas**: ver las cuentas del negocio, cambiar el rol (dueño, administrador, empleado), quitarlas o agregar una cuenta ya registrada por su correo.
+- **Tarifas**: crear y editar las tarifas del negocio. Llegan a sus tablets al sincronizar.
+- **Sesiones**: historial del negocio con filtros de fecha.
+- **Planes SaaS**: catálogo editable (precio, límite de dispositivos, sesiones por mes, cuentas y funciones) y cuántos negocios tiene cada plan.
+
+Para agregar otra persona administradora:
+
+```sql
+insert into public.playtime_platform_admins(email) values ('correo@ejemplo.com');
+```
+
 ## Stack
 
 React + TypeScript + Vite · Tailwind CSS v4 · Dexie (IndexedDB) · Supabase (Auth, Postgres, Realtime) · PWA · Capacitor

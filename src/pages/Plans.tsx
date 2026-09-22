@@ -5,7 +5,7 @@ import { usePlans } from '../hooks/useData'
 import type { Plan } from '../types'
 import { duration, money } from '../utils/format'
 
-const input = 'w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2 outline-none focus:border-amber-500'
+const input = 'w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2 outline-none focus:border-brand'
 
 type Draft = { id?: string; name: string; minutes: string; price: string; is_extension: boolean }
 
@@ -41,15 +41,15 @@ export function Plans() {
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-3xl font-black text-slate-800">Tarifas</h1>
+        <h1 className="text-3xl font-black text-brand">Tarifas</h1>
         {canManage && (
-          <button onClick={() => edit()} className="rounded-2xl bg-amber-500 px-5 py-3 font-black text-white">+ Nuevo plan</button>
+          <button onClick={() => edit()} className="rounded-2xl bg-brand px-5 py-3 font-black text-white">+ Nuevo plan</button>
         )}
       </div>
       {!canManage && <p className="mb-4 rounded-2xl bg-slate-100 p-3 text-slate-600">Solo el dueño o un administrador puede cambiar tarifas.</p>}
 
       {draft && (
-        <div className="mb-5 grid gap-3 rounded-3xl bg-white p-5 shadow-sm sm:grid-cols-[2fr_1fr_1fr]">
+        <div className="mb-5 grid gap-3 rounded-[28px] bg-mint p-5 sm:grid-cols-[2fr_1fr_1fr]">
           <label className="grid gap-1 text-sm font-bold text-slate-500">Nombre
             <input className={input} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} autoFocus />
           </label>
@@ -71,7 +71,7 @@ export function Plans() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-[28px] bg-mint">
         <table className="w-full text-left">
           <thead className="bg-slate-50 text-xs uppercase text-slate-400">
             <tr>

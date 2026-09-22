@@ -9,9 +9,16 @@ export function timeLevel(remainingMs: number): TimeLevel {
   return 'green'
 }
 
+export const LEVEL_COLOR: Record<TimeLevel, string> = {
+  green: '#22c55e',
+  yellow: '#ffe11c',
+  orange: '#fb923c',
+  red: '#ef4444',
+}
+
 export const LEVEL_STYLES: Record<TimeLevel, { card: string; text: string; dot: string }> = {
-  green: { card: 'border-emerald-400 bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-  yellow: { card: 'border-yellow-400 bg-yellow-50', text: 'text-yellow-700', dot: 'bg-yellow-400' },
-  orange: { card: 'border-orange-500 bg-orange-50', text: 'text-orange-600', dot: 'bg-orange-500' },
-  red: { card: 'border-red-500 bg-red-50 animate-pulse-slow', text: 'text-red-600', dot: 'bg-red-500' },
+  green: { card: 'ring-emerald-300', text: 'text-brand', dot: 'bg-emerald-500' },
+  yellow: { card: 'ring-yellow-300', text: 'text-brand', dot: 'bg-yellow-400' },
+  orange: { card: 'ring-orange-400', text: 'text-orange-500', dot: 'bg-orange-500' },
+  red: { card: 'ring-red-400 animate-pulse-slow', text: 'text-red-500', dot: 'bg-red-500' },
 }

@@ -6,11 +6,11 @@ import { syncNow } from '../features/sync/engine'
 import { useSyncState } from '../features/sync/useSync'
 import { playTimeUp } from '../utils/sound'
 
-const input = 'w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2 outline-none focus:border-amber-500 disabled:bg-slate-50'
+const input = 'w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2 outline-none focus:border-brand disabled:bg-slate-50'
 const CURRENCIES = ['COP', 'USD', 'MXN', 'PEN', 'CLP', 'ARS', 'EUR']
 
 export function Settings() {
-  const { business, canManage, user, membership, signOut } = useAuth()
+  const { business, canManage, user, membership, signOut, isPlatformAdmin } = useAuth()
   const sync = useSyncState()
   const [form, setForm] = useState({ name: '', phone: '', address: '', currency: 'COP', alert_minutes: '5', sound_enabled: true })
   const [saved, setSaved] = useState(false)
@@ -63,9 +63,9 @@ export function Settings() {
 
   return (
     <div className="mx-auto grid max-w-4xl gap-5">
-      <h1 className="text-3xl font-black text-slate-800">Ajustes</h1>
+      <h1 className="text-3xl font-black text-brand">Ajustes</h1>
 
-      <section className="grid gap-4 rounded-3xl bg-white p-5 shadow-sm sm:grid-cols-2">
+      <section className="grid gap-4 rounded-[28px] bg-mint p-5 sm:grid-cols-2">
         <h2 className="text-lg font-black sm:col-span-2">Negocio</h2>
         <label className="grid gap-1 text-sm font-bold text-slate-500">Nombre
           <input className={input} disabled={!canManage} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -93,25 +93,25 @@ export function Settings() {
         </div>
         {error && <p className="font-semibold text-red-600 sm:col-span-2">{error}</p>}
         {canManage && (
-          <button onClick={save} className="rounded-2xl bg-emerald-500 py-3 font-black text-white sm:col-span-2">
+          <button onClick={save} className="rounded-full bg-sun py-3 font-black text-brand shadow-[0_5px_0_var(--color-sun-dark)] sm:col-span-2">
             {saved ? '✓ Guardado' : 'Guardar cambios'}
           </button>
         )}
       </section>
 
-      <section className="grid gap-4 rounded-3xl bg-white p-5 shadow-sm sm:grid-cols-[auto_1fr]">
+      <section className="grid gap-4 rounded-[28px] bg-mint p-5 sm:grid-cols-[auto_1fr]">
         <h2 className="text-lg font-black sm:col-span-2">📺 Pantalla pública</h2>
         {qr && <img src={qr} alt="Código QR de la pantalla pública" className="size-44 rounded-2xl border" />}
         <div className="grid content-start gap-3">
           <p className="text-slate-600">Abre este enlace en una TV o tablet del parque. Solo muestra nombre y tiempo restante.</p>
           <code className="break-all rounded-xl bg-slate-100 p-3 text-sm">{publicUrl}</code>
           <div className="flex flex-wrap gap-2">
-            <a href={publicUrl} target="_blank" rel="noreferrer" className="rounded-xl bg-slate-800 px-4 py-2 font-bold text-white">Abrir</a>
-            <a href="/pantalla" target="_blank" rel="noreferrer" className="rounded-xl bg-slate-100 px-4 py-2 font-bold">Abrir en este dispositivo (offline)</a>
+            <a href={publicUrl} target="_blank" rel="noreferrer" className="rounded-full bg-brand px-4 py-2 font-bold text-white">Abrir</a>
+            <a href="/pantalla" target="_blank" rel="noreferrer" className="rounded-full bg-white px-4 py-2 font-bold">Abrir en este dispositivo (offline)</a>
             {canManage && (
               <button
                 onClick={() => confirm('El enlace actual dejará de funcionar. ¿Continuar?') && updateBusiness(business.id, { public_token: crypto.randomUUID() })}
-                className="rounded-xl bg-slate-100 px-4 py-2 font-bold text-red-600"
+                className="rounded-full bg-white px-4 py-2 font-bold text-red-600"
               >
                 Cambiar enlace
               </button>
@@ -120,23 +120,26 @@ export function Settings() {
         </div>
       </section>
 
-      <section className="grid gap-3 rounded-3xl bg-white p-5 shadow-sm">
+      <section className="grid gap-3 rounded-[28px] bg-mint p-5">
         <h2 className="text-lg font-black">Sincronización</h2>
         <p className="text-slate-600">
           {sync.online ? 'En línea' : 'Sin conexión — los datos se guardan en este dispositivo'} · Pendientes: <b>{sync.pending}</b>
           {sync.lastSyncAt && <> · Última: {new Date(sync.lastSyncAt).toLocaleTimeString('es-CO')}</>}
         </p>
-        {sync.error && <p className="text-sm font-semibold text-amber-700">{sync.error}</p>}
-        <button onClick={() => syncNow()} disabled={!sync.online || sync.syncing} className="w-fit rounded-xl bg-sky-500 px-4 py-2 font-bold text-white disabled:opacity-50">
+        {sync.error && <p className="text-sm font-semibold text-brand">{sync.error}</p>}
+        <button onClick={() => syncNow()} disabled={!sync.online || sync.syncing} className="w-fit rounded-full bg-brand px-4 py-2 font-bold text-white disabled:opacity-50">
           Sincronizar ahora
         </button>
       </section>
 
-      <section className="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-white p-5 shadow-sm">
+      <section className="flex flex-wrap items-center justify-between gap-3 rounded-[28px] bg-mint p-5">
         <div className="text-slate-600">
           {user?.email} · <span className="font-bold capitalize">{membership?.role === 'owner' ? 'Dueño' : membership?.role === 'admin' ? 'Administrador' : 'Empleado'}</span>
         </div>
-        <button onClick={logout} className="rounded-xl bg-red-50 px-4 py-2 font-bold text-red-600">Cerrar sesión</button>
+        <div className="flex gap-2">
+          {isPlatformAdmin && <a href="/admin" className="rounded-full bg-brand px-4 py-2 font-black text-white">🛡 Panel admin</a>}
+          <button onClick={logout} className="rounded-full bg-red-50 px-4 py-2 font-bold text-red-600">Cerrar sesión</button>
+        </div>
       </section>
     </div>
   )

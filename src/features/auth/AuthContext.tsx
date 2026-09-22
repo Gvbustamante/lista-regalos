@@ -12,6 +12,8 @@ interface AuthValue {
   membership: Membership | null
   business: Business | null
   canManage: boolean
+  /** Super-admin de la plataforma (panel /admin) */
+  isPlatformAdmin: boolean
   /** true si no hay internet y tampoco hay datos guardados para entrar */
   needsOnline: boolean
   createBusiness: (name: string, ownerName: string) => Promise<void>
@@ -45,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [membership, setMembership] = useState<Membership | null>(null)
   const [needsOnline, setNeedsOnline] = useState(false)
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
 
   const business =
     useLiveQuery(() => (membership ? db.businesses.get(membership.business_id) : undefined), [membership?.business_id]) ??
@@ -54,9 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u)
     if (!u) {
       setMembership(null)
+      setIsPlatformAdmin(false)
       setLoading(false)
       return
     }
+    const adminKey = `platformAdmin:${u.id}`
+    if (navigator.onLine) {
+      const { data, error } = await supabase.rpc('playtime_is_platform_admin')
+      if (!error) await setMeta(adminKey, data === true)
+    }
+    setIsPlatformAdmin((await getMeta<boolean>(adminKey)) === true)
     const m = await loadMembership(u)
     if (m === 'offline') {
       setNeedsOnline(true)
@@ -116,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const canManage = membership?.role === 'owner' || membership?.role === 'admin'
 
   return (
-    <Ctx.Provider value={{ loading, user, membership, business, canManage, needsOnline, createBusiness, signOut }}>
+    <Ctx.Provider value={{ loading, user, membership, business, canManage, isPlatformAdmin, needsOnline, createBusiness, signOut }}>
       {children}
     </Ctx.Provider>
   )

@@ -1,3 +1,4 @@
+import type React from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { AuthProvider, useAuth } from './features/auth/AuthContext'
@@ -10,15 +11,22 @@ import { PublicRemote } from './pages/PublicRemote'
 import { PublicScreen } from './pages/PublicScreen'
 import { Reports } from './pages/Reports'
 import { Settings } from './pages/Settings'
+import { AdminGate } from './pages/admin/AdminGate'
 
 function Gate() {
-  const { loading, user, membership, business, needsOnline } = useAuth()
+  const { loading, user, membership, business, needsOnline, isPlatformAdmin } = useAuth()
 
   if (loading) return <Splash text="Cargando…" />
   if (!user) return <Login />
   if (needsOnline) return <Splash text="Conéctate a internet para el primer ingreso en este dispositivo." />
-  if (!membership) return <Onboarding />
+  if (!membership) return isPlatformAdmin ? <Navigate to="/admin" replace /> : <Onboarding />
   if (!business) return <Splash text="Descargando datos del negocio…" />
+  if (business.status === 'suspended')
+    return (
+      <Splash text={`La cuenta de "${business.name}" está suspendida. Comunícate con PlayTime para reactivarla.`}>
+        {isPlatformAdmin && <a href="/admin" className="mt-4 inline-block font-black text-brand underline">Ir al panel admin</a>}
+      </Splash>
+    )
 
   return (
     <Routes>
@@ -35,12 +43,13 @@ function Gate() {
   )
 }
 
-function Splash({ text }: { text: string }) {
+function Splash({ text, children }: { text: string; children?: React.ReactNode }) {
   return (
-    <div className="grid min-h-dvh place-items-center bg-amber-50 p-6 text-center">
+    <div className="grid min-h-dvh place-items-center bg-mint-soft p-6 text-center">
       <div>
         <img src="/icon.svg" alt="" className="mx-auto size-20 animate-pulse" />
-        <p className="mt-4 text-lg font-bold text-slate-600">{text}</p>
+        <p className="mt-4 max-w-md text-lg font-bold text-brand">{text}</p>
+        {children}
       </div>
     </div>
   )
@@ -52,6 +61,14 @@ export default function App() {
       <Routes>
         {/* Pantalla pública remota: no requiere sesión */}
         <Route path="/p/:token" element={<PublicRemote />} />
+        <Route
+          path="/admin/*"
+          element={
+            <AuthProvider>
+              <AdminGate />
+            </AuthProvider>
+          }
+        />
         <Route
           path="*"
           element={

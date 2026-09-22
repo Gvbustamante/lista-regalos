@@ -18,6 +18,9 @@ export interface Business extends SyncMeta {
   alert_minutes: number
   sound_enabled: boolean
   public_token: string
+  saas_plan: string
+  status: 'active' | 'suspended'
+  plan_expires_at: string | null
   created_at: string
   updated_at: string
 }
@@ -89,4 +92,48 @@ export interface Membership {
   business_id: string
   user_id: string
   role: Role
+}
+
+export interface SaasPlan {
+  id: string
+  name: string
+  price_monthly: number
+  currency: string
+  max_devices: number | null
+  max_sessions_month: number | null
+  max_members: number | null
+  features: string[]
+  sort_order: number
+  active: boolean
+  updated_at: string
+}
+
+export interface MemberRow {
+  business_id: string
+  user_id: string
+  name: string | null
+  email: string | null
+  role: Role
+  created_at: string
+}
+
+export interface AdminBusinessRow {
+  id: string
+  name: string
+  phone: string | null
+  address: string | null
+  currency: string
+  saas_plan: string
+  status: 'active' | 'suspended'
+  plan_expires_at: string | null
+  created_at: string
+  owner_email: string | null
+  members: number
+  children: number
+  sessions_total: number
+  sessions_month: number
+  active_now: number
+  revenue_month: number
+  revenue_total: number
+  last_activity: string | null
 }
