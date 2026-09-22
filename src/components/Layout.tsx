@@ -19,7 +19,8 @@ const side = (active: boolean) =>
   }`
 
 export function Layout() {
-  const { business, isPlatformAdmin } = useAuth()
+  const { business, isPlatformAdmin, businesses, switchBusiness } = useAuth()
+  const rootName = (id: string | null) => businesses.find((b) => b.id === id)?.name
 
   return (
     <div className="flex min-h-dvh bg-canvas" onPointerDown={unlockAudio}>
@@ -51,7 +52,22 @@ export function Layout() {
       <div className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
         <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-white/85 px-4 py-3 backdrop-blur md:px-8">
           <div className="min-w-0">
-            <div className="truncate text-base font-bold text-ink">{business?.name ?? 'PlayTime'}</div>
+            {businesses.length > 1 && business ? (
+              <select
+                aria-label="Cambiar de sede"
+                value={business.id}
+                onChange={(e) => void switchBusiness(e.target.value)}
+                className="-ml-1 max-w-[60vw] truncate rounded-lg bg-transparent px-1 py-0.5 text-base font-bold text-ink outline-none hover:bg-canvas"
+              >
+                {businesses.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.parent_id ? `${rootName(b.parent_id) ?? 'Principal'} · ${b.name}` : b.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="truncate text-base font-bold text-ink">{business?.name ?? 'PlayTime'}</div>
+            )}
             <div className="text-xs text-slate-500 first-letter:uppercase">{dateLong()}</div>
           </div>
           <SyncBadge />

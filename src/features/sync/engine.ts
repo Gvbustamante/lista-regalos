@@ -2,6 +2,7 @@ import type Dexie from 'dexie'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { db, getMeta, setMeta, type SyncTableName } from '../../database/local/db'
 import { supabase, T } from '../../database/supabase/client'
+import { friendlyLimitError } from '../plan/limits'
 
 /**
  * Motor de sincronización offline-first.
@@ -173,7 +174,7 @@ async function run() {
     set({ lastSyncAt: new Date().toISOString(), lastSynced: pushed })
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
-    set({ error: /fetch|network/i.test(msg) ? 'Sin conexión con el servidor' : msg })
+    set({ error: friendlyLimitError(msg) ?? (/fetch|network/i.test(msg) ? 'Sin conexión con el servidor' : msg) })
   } finally {
     set({ syncing: false })
     await countPending()

@@ -12,6 +12,8 @@ import { PublicScreen } from './pages/PublicScreen'
 import { Reports } from './pages/Reports'
 import { Settings } from './pages/Settings'
 import { AdminGate } from './pages/admin/AdminGate'
+import { UsageProvider, useUsage } from './features/plan/UsageContext'
+import { contactLinks } from './features/plan/limits'
 
 function Gate() {
   const { loading, user, membership, business, needsOnline, isPlatformAdmin } = useAuth()
@@ -29,17 +31,41 @@ function Gate() {
     )
 
   return (
-    <Routes>
-      <Route path="/pantalla" element={<PublicScreen />} />
-      <Route element={<Layout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="historial" element={<History />} />
-        <Route path="reportes" element={<Reports />} />
-        <Route path="tarifas" element={<Plans />} />
-        <Route path="configuracion" element={<Settings />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Route>
-    </Routes>
+    <UsageProvider>
+      <DeviceGate>
+        <Routes>
+          <Route path="/pantalla" element={<PublicScreen />} />
+          <Route element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="historial" element={<History />} />
+            <Route path="reportes" element={<Reports />} />
+            <Route path="tarifas" element={<Plans />} />
+            <Route path="configuracion" element={<Settings />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </DeviceGate>
+    </UsageProvider>
+  )
+}
+
+/** Bloquea el dispositivo si el plan ya tiene todos sus dispositivos ocupados */
+function DeviceGate({ children }: { children: React.ReactNode }) {
+  const { deviceBlocked, retryDevice, usage } = useUsage()
+  const { signOut } = useAuth()
+  if (!deviceBlocked) return <>{children}</>
+  const links = contactLinks(usage, 'Necesito más dispositivos.')
+  return (
+    <Splash text={`Este dispositivo no está autorizado: ${deviceBlocked}.`}>
+      <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+        Libera un dispositivo en Ajustes → Dispositivos desde una tablet ya autorizada, mejora tu plan o compra un extra.
+      </p>
+      <div className="mt-5 flex flex-wrap justify-center gap-2">
+        <button onClick={retryDevice} className="rounded-xl bg-brand px-4 py-2 font-semibold text-white">Reintentar</button>
+        {links.whatsapp && <a href={links.whatsapp} target="_blank" rel="noreferrer" className="rounded-xl bg-emerald-500 px-4 py-2 font-semibold text-white">WhatsApp</a>}
+        <button onClick={() => signOut().catch(() => {})} className="rounded-xl border border-line bg-white px-4 py-2 font-semibold text-ink">Cerrar sesión</button>
+      </div>
+    </Splash>
   )
 }
 
@@ -48,7 +74,7 @@ function Splash({ text, children }: { text: string; children?: React.ReactNode }
     <div className="grid min-h-dvh place-items-center bg-canvas p-6 text-center">
       <div>
         <img src="/icon.svg" alt="" className="mx-auto size-20 animate-pulse" />
-        <p className="mt-4 max-w-md text-lg font-bold text-brand">{text}</p>
+        <p className="mx-auto mt-4 max-w-md text-lg font-semibold text-ink">{text}</p>
         {children}
       </div>
     </div>

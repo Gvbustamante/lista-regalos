@@ -4,6 +4,9 @@ import { SessionCard } from '../components/SessionCard'
 import { SessionModal } from '../components/SessionModal'
 import { Stat } from '../components/Stat'
 import { Btn } from '../components/ui'
+import { LimitModal } from '../components/LimitModal'
+import { UsageMeter } from '../components/UsageMeter'
+import { useUsage } from '../features/plan/UsageContext'
 import { useAuth } from '../features/auth/AuthContext'
 import { summarize } from '../features/sessions/stats'
 import { useActiveSessions, usePlans, useRangeData } from '../hooks/useData'
@@ -19,6 +22,9 @@ export function Dashboard() {
   const { bounds } = useRange('today')
   const today = summarize(useRangeData(business?.id, bounds[0], bounds[1]))
   const [newOpen, setNewOpen] = useState(false)
+  const [limitOpen, setLimitOpen] = useState(false)
+  const { block } = useUsage()
+  const openNew = () => (block ? setLimitOpen(true) : setNewOpen(true))
   const [openId, setOpenId] = useState<string | null>(null)
 
   const sorted = useMemo(() => [...active].sort((a, b) => Date.parse(a.expires_at) - Date.parse(b.expires_at)), [active])
@@ -39,13 +45,15 @@ export function Dashboard() {
         <Stat label="Ingresos hoy" value={money(today.income, business?.currency)} tone="emerald" />
       </div>
 
+      <UsageMeter onUpgrade={() => setLimitOpen(true)} />
+
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-ink">En el parque</h1>
           <p className="text-sm text-slate-500">{active.length ? `${active.length} ${active.length === 1 ? 'niño' : 'niños'} jugando ahora` : 'Registra la primera entrada del día'}</p>
         </div>
-        <Btn onClick={() => setNewOpen(true)} className="w-full px-6 py-3.5 text-base sm:w-auto">
-          + Nueva entrada
+        <Btn onClick={openNew} className="w-full px-6 py-3.5 text-base sm:w-auto">
+          {block ? '🔒 Nueva entrada' : '+ Nueva entrada'}
         </Btn>
       </div>
 
@@ -63,6 +71,7 @@ export function Dashboard() {
       )}
 
       {newOpen && <NewEntryModal onClose={() => setNewOpen(false)} />}
+      {limitOpen && <LimitModal reason={block ?? 'sessions'} onClose={() => setLimitOpen(false)} />}
       {openId && <SessionModal sessionId={openId} onClose={() => setOpenId(null)} />}
     </div>
   )

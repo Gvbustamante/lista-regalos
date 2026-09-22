@@ -1,5 +1,5 @@
 import { supabase, T } from '../../database/supabase/client'
-import type { AdminBusinessRow, Business, MemberRow, Payment, Plan, Role, SaasPlan, Session } from '../../types'
+import type { AdminBusinessRow, Business, Device, LimitKind, MemberRow, Payment, Plan, PlanExtra, Role, SaasPlan, Session, Usage } from '../../types'
 
 /** Acceso online del super-admin (no usa la base local) */
 
@@ -38,6 +38,29 @@ export const adminApi = {
     ok(await supabase.from(T.plans).select('*').eq('business_id', id).order('sort_order')) as Plan[],
   savePlan: async (p: Partial<Plan> & { business_id: string }) =>
     ok(await supabase.from(T.plans).upsert({ ...p, id: p.id ?? crypto.randomUUID(), updated_at: now() })),
+
+  usage: async (id: string) => ok(await supabase.rpc('playtime_usage', { p_business_id: id })) as Usage,
+
+  extras: async (rootId: string) =>
+    ok(await supabase.from('playtime_plan_extras').select('*').eq('root_id', rootId).order('created_at', { ascending: false })) as PlanExtra[],
+  addExtra: async (rootId: string, kind: LimitKind, amount: number, validUntil: string | null, note: string) =>
+    ok(await supabase.from('playtime_plan_extras').insert({ root_id: rootId, kind, amount, valid_until: validUntil, note: note || null })),
+  removeExtra: async (id: string) => ok(await supabase.from('playtime_plan_extras').delete().eq('id', id)),
+
+  devices: async (rootId: string) =>
+    ok(await supabase.from('playtime_devices').select('*').eq('root_id', rootId).order('last_seen_at', { ascending: false })) as Device[],
+  removeDevice: async (id: string) => ok(await supabase.from('playtime_devices').delete().eq('id', id)),
+
+  createBranch: async (rootId: string, name: string) => ok(await supabase.rpc('playtime_create_branch', { p_root: rootId, p_name: name })) as string,
+
+  settings: async () =>
+    ok(await supabase.from('playtime_platform_settings').select('*').eq('id', 1).single()) as { contact_whatsapp: string | null; contact_email: string | null },
+  saveSettings: async (p: { contact_whatsapp: string | null; contact_email: string | null }) =>
+    ok(await supabase.from('playtime_platform_settings').update({ ...p, updated_at: now() }).eq('id', 1)),
+
+  admins: async () => ok(await supabase.from('playtime_platform_admins').select('*').order('created_at')) as { email: string; created_at: string }[],
+  addAdmin: async (email: string) => ok(await supabase.from('playtime_platform_admins').insert({ email: email.trim().toLowerCase() })),
+  removeAdmin: async (email: string) => ok(await supabase.from('playtime_platform_admins').delete().eq('email', email)),
 
   sessions: async (id: string, from: Date, to: Date) => {
     const sessions = ok(

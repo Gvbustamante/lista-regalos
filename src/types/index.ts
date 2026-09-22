@@ -21,6 +21,8 @@ export interface Business extends SyncMeta {
   saas_plan: string
   status: 'active' | 'suspended'
   plan_expires_at: string | null
+  parent_id: string | null
+  timezone: string
   created_at: string
   updated_at: string
 }
@@ -102,6 +104,7 @@ export interface SaasPlan {
   max_devices: number | null
   max_sessions_month: number | null
   max_members: number | null
+  max_branches: number | null
   features: string[]
   sort_order: number
   active: boolean
@@ -119,6 +122,8 @@ export interface MemberRow {
 
 export interface AdminBusinessRow {
   id: string
+  parent_id: string | null
+  devices: number
   name: string
   phone: string | null
   address: string | null
@@ -136,4 +141,49 @@ export interface AdminBusinessRow {
   revenue_month: number
   revenue_total: number
   last_activity: string | null
+}
+
+export type LimitKind = 'sessions' | 'members' | 'devices' | 'branches'
+
+export interface Usage {
+  root_id: string
+  root_name: string
+  plan_id: string
+  plan_name: string
+  plan_price: number
+  plan_currency: string
+  status: 'active' | 'suspended'
+  plan_expires_at: string | null
+  expired: boolean
+  month_start: string
+  limits: Record<LimitKind, number | null>
+  used: Record<LimitKind, number>
+  contact: { whatsapp: string | null; email: string | null }
+  server_time: string
+}
+
+export interface PlanExtra {
+  id: string
+  root_id: string
+  kind: LimitKind
+  amount: number
+  valid_until: string | null
+  note: string | null
+  created_at: string
+}
+
+export interface Device {
+  id: string
+  root_id: string
+  business_id: string
+  name: string | null
+  last_seen_at: string
+  created_at: string
+}
+
+export interface MyBusiness {
+  id: string
+  name: string
+  parent_id: string | null
+  role: Role
 }

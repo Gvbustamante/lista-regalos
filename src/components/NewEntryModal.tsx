@@ -10,10 +10,12 @@ import { unlockAudio } from '../utils/sound'
 import { Modal } from './Modal'
 import { PaymentPicker } from './PaymentPicker'
 import { Btn, inputCls } from './ui'
+import { useUsage } from '../features/plan/UsageContext'
 
 
 export function NewEntryModal({ onClose }: { onClose: () => void }) {
   const { business, user } = useAuth()
+  const { block } = useUsage()
   const plans = usePlans(business?.id).filter((p) => p.active && !p.is_extension)
   const children = useLiveQuery(() => (business ? db.children.where('business_id').equals(business.id).toArray() : []), [business?.id]) ?? []
 
@@ -57,6 +59,7 @@ export function NewEntryModal({ onClose }: { onClose: () => void }) {
     e.preventDefault()
     unlockAudio()
     if (!business) return
+    if (block) return setError(block === 'expired' ? 'Tu plan venció. Renuévalo para registrar entradas.' : block === 'suspended' ? 'Cuenta suspendida.' : 'Llegaste al límite de entradas de tu plan este mes.')
     if (!name.trim()) return setError('Escribe el nombre del niño')
     if (!planId) return setError('Selecciona el tiempo')
     if (!Number.isFinite(minutes) || minutes <= 0) return setError('Minutos inválidos')

@@ -5,6 +5,8 @@ import { Pill, Ring } from '../../components/ui'
 import { adminApi } from '../../features/admin/api'
 import { useAsync } from '../../features/admin/useAsync'
 import type { AdminBusinessRow, SaasPlan } from '../../types'
+
+type OrgRow = AdminBusinessRow & { sedes: number }
 import { dateShort, money } from '../../utils/format'
 
 export function StatusPill({ status }: { status: 'active' | 'suspended' }) {
@@ -20,8 +22,30 @@ export function AdminHome() {
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState<string>('all')
 
-  const [rows, plans] = data ?? [[], []]
+  const [allRows, plans] = data ?? [[], []]
   const planById = useMemo(() => new Map(plans.map((p) => [p.id, p])), [plans])
+  // Agrupa sedes dentro de su negocio principal y suma sus números
+  const rows = useMemo<OrgRow[]>(() => {
+    const roots = allRows.filter((b) => !b.parent_id)
+    return roots.map((r) => {
+      const kids = allRows.filter((b) => b.parent_id === r.id)
+      const sum = (k: 'active_now' | 'sessions_month' | 'revenue_month' | 'revenue_total' | 'devices' | 'children' | 'sessions_total') =>
+        [r, ...kids].reduce((a, b) => a + Number(b[k]), 0)
+      const last = [r, ...kids].map((b) => b.last_activity).filter(Boolean).sort().pop() ?? null
+      return {
+        ...r,
+        sedes: kids.length,
+        active_now: sum('active_now'),
+        sessions_month: sum('sessions_month'),
+        revenue_month: sum('revenue_month'),
+        revenue_total: sum('revenue_total'),
+        devices: sum('devices'),
+        children: sum('children'),
+        sessions_total: sum('sessions_total'),
+        last_activity: last,
+      }
+    })
+  }, [allRows])
 
   const filtered = rows.filter((b) => {
     const text = `${b.name} ${b.owner_email ?? ''} ${b.phone ?? ''}`.toLowerCase()
@@ -90,7 +114,7 @@ export function AdminHome() {
   )
 }
 
-function BusinessCard({ b, plan }: { b: AdminBusinessRow; plan?: SaasPlan }) {
+function BusinessCard({ b, plan }: { b: OrgRow; plan?: SaasPlan }) {
   const limit = plan?.max_sessions_month ?? null
   const usage = limit ? b.sessions_month / limit : 0
   return (
@@ -117,8 +141,10 @@ function BusinessCard({ b, plan }: { b: AdminBusinessRow; plan?: SaasPlan }) {
           <dd className="font-extrabold">{b.active_now}</dd>
           <dt className="font-medium text-slate-500">Ventas mes</dt>
           <dd className="font-extrabold">{money(b.revenue_month, b.currency)}</dd>
-          <dt className="font-medium text-slate-500">Cuentas</dt>
-          <dd className="font-extrabold">{b.members}</dd>
+          <dt className="font-medium text-slate-500">Sedes</dt>
+          <dd className="font-extrabold">{b.sedes + 1}</dd>
+          <dt className="font-medium text-slate-500">Dispositivos</dt>
+          <dd className="font-extrabold">{b.devices}</dd>
         </dl>
       </div>
       <div className="flex items-center justify-between text-xs text-slate-500">

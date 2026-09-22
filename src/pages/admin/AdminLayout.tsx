@@ -20,7 +20,7 @@ export function AdminLayout() {
           </div>
           <nav className="flex flex-wrap items-center gap-2">
             <NavLink to="/admin" end className={pill}>Negocios</NavLink>
-            <NavLink to="/admin/planes" className={pill}>Planes SaaS</NavLink>
+            <NavLink to="/admin/planes" className={pill}>Planes y ajustes</NavLink>
             {membership && <NavLink to="/" className={pill({ isActive: false })}>← Mi parque</NavLink>}
             <button onClick={() => supabase.auth.signOut()} className="rounded-xl px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-50">Salir</button>
           </nav>

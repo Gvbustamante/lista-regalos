@@ -5,6 +5,7 @@ import { updateBusiness } from '../features/business/repo'
 import { syncNow } from '../features/sync/engine'
 import { useSyncState } from '../features/sync/useSync'
 import { playTimeUp } from '../utils/sound'
+import { BranchesSection, DevicesSection, PasswordSection, PlanSection, TeamSection } from '../features/account/AccountSections'
 import { inputCls } from '../components/ui'
 
 const CURRENCIES = ['COP', 'USD', 'MXN', 'PEN', 'CLP', 'ARS', 'EUR']
@@ -65,6 +66,8 @@ export function Settings() {
     <div className="mx-auto grid max-w-4xl gap-5">
       <h1 className="text-2xl font-extrabold text-ink">Ajustes</h1>
 
+      <PlanSection />
+
       <section className="grid gap-4 rounded-3xl bg-white border border-line shadow-card p-5 sm:grid-cols-2">
         <h2 className="text-base font-bold sm:col-span-2">Negocio</h2>
         <label className="grid gap-1.5 text-sm font-medium text-slate-600">Nombre
@@ -93,7 +96,7 @@ export function Settings() {
         </div>
         {error && <p className="font-semibold text-red-600 sm:col-span-2">{error}</p>}
         {canManage && (
-          <button onClick={save} className="rounded-full bg-sun py-3 font-extrabold text-brand shadow-[0_5px_0_var(--color-sun-dark)] sm:col-span-2">
+          <button onClick={save} className="rounded-2xl bg-brand py-3 font-bold text-white hover:bg-brand-dark sm:col-span-2">
             {saved ? '✓ Guardado' : 'Guardar cambios'}
           </button>
         )}
@@ -119,6 +122,11 @@ export function Settings() {
           </div>
         </div>
       </section>
+
+      <BranchesSection />
+      <TeamSection />
+      <DevicesSection />
+      <PasswordSection />
 
       <section className="grid gap-3 rounded-3xl bg-white border border-line shadow-card p-5">
         <h2 className="text-base font-bold">Sincronización</h2>

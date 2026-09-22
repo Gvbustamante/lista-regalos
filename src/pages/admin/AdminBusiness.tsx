@@ -7,7 +7,8 @@ import { adminApi } from '../../features/admin/api'
 import { useAsync } from '../../features/admin/useAsync'
 import { useAuth } from '../../features/auth/AuthContext'
 import { useRange } from '../../hooks/useRange'
-import type { Business, Plan, Role, SaasPlan } from '../../types'
+import type { AdminBusinessRow, Business, LimitKind, Plan, Role, SaasPlan, Usage } from '../../types'
+import { LIMIT_LABEL } from '../../features/plan/limits'
 import { dateShort, duration, money, paymentLabel, time } from '../../utils/format'
 import { StatusPill } from './AdminHome'
 
@@ -16,22 +17,25 @@ const ROLES: { value: Role; label: string }[] = [
   { value: 'admin', label: 'Administrador' },
   { value: 'employee', label: 'Empleado' },
 ]
-type Tab = 'resumen' | 'cuentas' | 'tarifas' | 'sesiones'
+type Tab = 'resumen' | 'cuentas' | 'tarifas' | 'sesiones' | 'sedes' | 'extras' | 'dispositivos'
 
 export function AdminBusiness() {
   const { id = '' } = useParams()
   const { data, error, reload } = useAsync(
-    () => Promise.all([adminApi.business(id), adminApi.saasPlans(), adminApi.overview().then((r) => r.find((x) => x.id === id) ?? null)]),
+    () => Promise.all([adminApi.business(id), adminApi.saasPlans(), adminApi.overview(), adminApi.usage(id)]),
     [id],
   )
   const [tab, setTab] = useState<Tab>('resumen')
 
   if (error) return <p className="rounded-2xl bg-red-50 p-4 font-bold text-red-600">{error}</p>
   if (!data) return <p className="p-10 text-center font-bold text-slate-400">Cargando…</p>
-  const [biz, plans, stats] = data
-  const plan = plans.find((p) => p.id === biz.saas_plan)
-  const limit = plan?.max_sessions_month ?? null
-  const used = stats?.sessions_month ?? 0
+  const [biz, plans, all, usage] = data
+  const stats = all.find((x) => x.id === id) ?? null
+  const branches = all.filter((x) => x.parent_id === id)
+  const parent = biz.parent_id ? all.find((x) => x.id === biz.parent_id) : null
+  const plan = plans.find((p) => p.id === usage.plan_id)
+  const limit = usage.limits.sessions
+  const used = usage.used.sessions
 
   return (
     <div className="grid gap-5">
@@ -41,11 +45,17 @@ export function AdminBusiness() {
           <span className="text-center font-extrabold leading-tight text-brand">
             <span className="text-2xl">{used}</span>
             <br />
-            <span className="text-xs text-slate-500">{limit ? `de ${limit}` : 'este mes'}</span>
+            <span className="text-xs text-slate-500">{limit ? `de ${limit} (org.)` : 'este mes'}</span>
           </span>
         </Ring>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-slate-500">Negocio</div>
+          <div className="text-sm font-medium text-slate-500">
+            {parent ? (
+              <>Sede de <Link to={`/admin/negocios/${parent.id}`} className="font-semibold text-brand underline">{parent.name}</Link></>
+            ) : (
+              'Negocio principal'
+            )}
+          </div>
           <h1 className="truncate text-2xl font-extrabold text-ink">{biz.name}</h1>
           <div className="mt-2 flex flex-wrap gap-2">
             <StatusPill status={biz.status} />
@@ -76,15 +86,18 @@ export function AdminBusiness() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {(['resumen', 'cuentas', 'tarifas', 'sesiones'] as Tab[]).map((t) => (
+        {((parent ? ['resumen', 'cuentas', 'tarifas', 'sesiones'] : ['resumen', 'cuentas', 'tarifas', 'sesiones', 'sedes', 'extras', 'dispositivos']) as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`rounded-full px-5 py-2 text-sm font-semibold capitalize ${tab === t ? 'bg-ink text-white' : 'border border-line bg-white text-slate-600 hover:text-ink'}`}>{t}</button>
         ))}
       </div>
 
-      {tab === 'resumen' && <SummaryTab biz={biz} plans={plans} onSaved={reload} />}
-      {tab === 'cuentas' && <MembersTab businessId={biz.id} maxMembers={plan?.max_members ?? null} />}
+      {tab === 'resumen' && (parent ? <SummaryTab biz={biz} plans={[]} onSaved={reload} /> : <SummaryTab biz={biz} plans={plans} onSaved={reload} />)}
+      {tab === 'cuentas' && <MembersTab businessId={biz.id} maxMembers={usage.limits.members} />}
       {tab === 'tarifas' && <PlansTab biz={biz} />}
       {tab === 'sesiones' && <SessionsTab biz={biz} />}
+      {tab === 'sedes' && <BranchesTab rootId={biz.id} branches={branches} onChanged={reload} />}
+      {tab === 'extras' && <ExtrasTab rootId={biz.id} usage={usage} onChanged={reload} />}
+      {tab === 'dispositivos' && <DevicesTab rootId={biz.id} all={all} onChanged={reload} />}
     </div>
   )
 }
@@ -139,6 +152,7 @@ function SummaryTab({ biz, plans, onSaved }: { biz: Business; plans: SaasPlan[];
 
       <section className="grid content-start gap-4 rounded-3xl bg-white border border-line shadow-card p-5">
         <h2 className="text-base font-bold text-ink">Suscripción</h2>
+        {plans.length === 0 && <p className="text-sm text-slate-500">Las sedes usan el plan del negocio principal.</p>}
         <div className="grid grid-cols-2 gap-3">
           {plans.map((p) => (
             <button
@@ -338,6 +352,183 @@ function SessionsTab({ biz }: { biz: Business }) {
           {data?.sessions.length === 0 && <li className="p-6 text-center font-bold text-slate-400">Sin entradas en este periodo</li>}
         </ul>
       )}
+    </section>
+  )
+}
+
+function BranchesTab({ rootId, branches, onChanged }: { rootId: string; branches: AdminBusinessRow[]; onChanged: () => Promise<void> }) {
+  const [name, setName] = useState('')
+  const [msg, setMsg] = useState('')
+  return (
+    <section className="grid gap-4 rounded-3xl border border-line bg-white p-5 shadow-card">
+      <h2 className="text-base font-bold text-ink">Sedes</h2>
+      {branches.length === 0 && <p className="text-sm text-slate-500">Este negocio aún no tiene sedes adicionales.</p>}
+      <div className="grid gap-3 md:grid-cols-2">
+        {branches.map((b) => (
+          <Link key={b.id} to={`/admin/negocios/${b.id}`} className="rounded-2xl border border-line p-4 hover:border-brand-line">
+            <div className="font-semibold text-ink">📍 {b.name}</div>
+            <div className="mt-1 text-sm text-slate-500">
+              {b.active_now} en el parque · {b.sessions_month} entradas este mes · {money(b.revenue_month, b.currency)}
+            </div>
+          </Link>
+        ))}
+      </div>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault()
+          try {
+            await adminApi.createBranch(rootId, name.trim())
+            setName('')
+            setMsg('')
+            await onChanged()
+          } catch (err) {
+            setMsg(err instanceof Error ? err.message : 'Error')
+          }
+        }}
+        className="flex flex-wrap gap-2"
+      >
+        <input required className={`${inputCls} min-w-52 flex-1`} placeholder="Nombre de la nueva sede" value={name} onChange={(e) => setName(e.target.value)} />
+        <Btn type="submit">+ Crear sede</Btn>
+      </form>
+      <p className="text-xs text-slate-500">Como admin puedes crear sedes aunque el plan esté en su límite. Se copian las tarifas y los dueños/administradores.</p>
+      {msg && <p className="text-sm font-semibold text-red-600">{msg}</p>}
+    </section>
+  )
+}
+
+const KINDS: LimitKind[] = ['sessions', 'members', 'devices', 'branches']
+
+function ExtrasTab({ rootId, usage, onChanged }: { rootId: string; usage: Usage; onChanged: () => Promise<void> }) {
+  const { data, reload } = useAsync(() => adminApi.extras(rootId), [rootId])
+  const [kind, setKind] = useState<LimitKind>('sessions')
+  const [amount, setAmount] = useState('50')
+  const [until, setUntil] = useState<'month' | 'forever' | 'date'>('month')
+  const [date, setDate] = useState('')
+  const [note, setNote] = useState('')
+  const [msg, setMsg] = useState('')
+
+  const validUntil = () => {
+    if (until === 'forever') return null
+    if (until === 'date') return date ? new Date(date + 'T23:59:59').toISOString() : null
+    const n = new Date()
+    return new Date(n.getFullYear(), n.getMonth() + 1, 1).toISOString()
+  }
+  const active = (x: { valid_until: string | null }) => !x.valid_until || Date.parse(x.valid_until) > Date.now()
+
+  return (
+    <div className="grid gap-5 lg:grid-cols-[1fr_1.2fr]">
+      <section className="grid content-start gap-4 rounded-3xl border border-line bg-white p-5 shadow-card">
+        <h2 className="text-base font-bold text-ink">Uso actual de la organización</h2>
+        <div className="grid grid-cols-2 gap-3">
+          {KINDS.map((k) => (
+            <div key={k} className="rounded-2xl bg-canvas p-3">
+              <div className="text-xs text-slate-500">{LIMIT_LABEL[k].title}</div>
+              <div className="font-bold tabular-nums text-ink">
+                {usage.used[k]} <span className="font-medium text-slate-400">/ {usage.limits[k] ?? '∞'}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <h2 className="mt-2 text-base font-bold text-ink">Agregar extra</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <label className={labelCls}>Tipo
+            <select className={inputCls} value={kind} onChange={(e) => setKind(e.target.value as LimitKind)}>
+              {KINDS.map((k) => <option key={k} value={k}>{LIMIT_LABEL[k].unit}</option>)}
+            </select>
+          </label>
+          <label className={labelCls}>Cantidad<input className={inputCls} inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))} /></label>
+          <label className={`${labelCls} col-span-2`}>Vigencia
+            <select className={inputCls} value={until} onChange={(e) => setUntil(e.target.value as typeof until)}>
+              <option value="month">Hasta fin de este mes</option>
+              <option value="forever">Permanente</option>
+              <option value="date">Hasta una fecha</option>
+            </select>
+          </label>
+          {until === 'date' && <label className={`${labelCls} col-span-2`}>Fecha<input type="date" className={inputCls} value={date} onChange={(e) => setDate(e.target.value)} /></label>}
+          <label className={`${labelCls} col-span-2`}>Nota (pago, referencia…)<input className={inputCls} value={note} onChange={(e) => setNote(e.target.value)} /></label>
+        </div>
+        <Btn
+          onClick={async () => {
+            const n = Number(amount)
+            if (!Number.isInteger(n) || n <= 0) return setMsg('Cantidad inválida')
+            if (until === 'date' && !date) return setMsg('Elige la fecha')
+            try {
+              await adminApi.addExtra(rootId, kind, n, validUntil(), note.trim())
+              setNote('')
+              setMsg('')
+              await reload()
+              await onChanged()
+            } catch (e) {
+              setMsg(e instanceof Error ? e.message : 'Error')
+            }
+          }}
+        >
+          + Agregar extra
+        </Btn>
+        {msg && <p className="text-sm font-semibold text-red-600">{msg}</p>}
+      </section>
+
+      <section className="grid content-start gap-3 rounded-3xl border border-line bg-white p-5 shadow-card">
+        <h2 className="text-base font-bold text-ink">Extras</h2>
+        {(data ?? []).length === 0 && <p className="text-sm text-slate-500">Sin extras.</p>}
+        <ul className="grid gap-2">
+          {(data ?? []).map((x) => (
+            <li key={x.id} className={`flex items-center gap-3 rounded-2xl border border-line p-3 ${active(x) ? '' : 'opacity-50'}`}>
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-ink">+{x.amount} {LIMIT_LABEL[x.kind].unit}</div>
+                <div className="truncate text-xs text-slate-500">
+                  {x.valid_until ? `${active(x) ? 'Hasta' : 'Venció'} ${dateShort(x.valid_until)}` : 'Permanente'} · creado {dateShort(x.created_at)}
+                  {x.note && ` · ${x.note}`}
+                </div>
+              </div>
+              <button
+                onClick={async () => {
+                  if (!confirm('¿Eliminar este extra?')) return
+                  await adminApi.removeExtra(x.id)
+                  await reload()
+                  await onChanged()
+                }}
+                className="rounded-xl px-3 py-1.5 text-sm font-semibold text-red-500 hover:bg-red-50"
+              >
+                Quitar
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  )
+}
+
+function DevicesTab({ rootId, all, onChanged }: { rootId: string; all: AdminBusinessRow[]; onChanged: () => Promise<void> }) {
+  const { data, reload } = useAsync(() => adminApi.devices(rootId), [rootId])
+  const nameOf = (id: string) => all.find((b) => b.id === id)?.name ?? ''
+  return (
+    <section className="grid gap-3 rounded-3xl border border-line bg-white p-5 shadow-card">
+      <h2 className="text-base font-bold text-ink">Dispositivos autorizados</h2>
+      {(data ?? []).length === 0 && <p className="text-sm text-slate-500">Ningún dispositivo registrado.</p>}
+      <ul className="grid gap-2">
+        {(data ?? []).map((d) => (
+          <li key={d.id} className="flex items-center gap-3 rounded-2xl border border-line p-3">
+            <span className="text-xl">📱</span>
+            <div className="min-w-0 flex-1">
+              <div className="truncate font-semibold text-ink">{d.name || 'Dispositivo'}</div>
+              <div className="text-xs text-slate-500">{nameOf(d.business_id)} · visto {dateShort(d.last_seen_at)} {time(d.last_seen_at)}</div>
+            </div>
+            <button
+              onClick={async () => {
+                if (!confirm('¿Quitar este dispositivo? Tendrá que volver a registrarse (si hay cupo).')) return
+                await adminApi.removeDevice(d.id)
+                await reload()
+                await onChanged()
+              }}
+              className="rounded-xl px-3 py-1.5 text-sm font-semibold text-red-500 hover:bg-red-50"
+            >
+              Quitar
+            </button>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }

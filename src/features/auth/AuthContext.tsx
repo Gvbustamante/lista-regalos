@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { clearLocalData, db, getMeta, setMeta } from '../../database/local/db'
 import { supabase, T } from '../../database/supabase/client'
-import type { Business, Membership } from '../../types'
+import type { Business, Membership, MyBusiness, Role } from '../../types'
 import { countPending, startSync, stopSync, syncNow } from '../sync/engine'
 
 interface AuthValue {
@@ -16,28 +16,38 @@ interface AuthValue {
   isPlatformAdmin: boolean
   /** true si no hay internet y tampoco hay datos guardados para entrar */
   needsOnline: boolean
+  /** Negocios y sedes a los que pertenece la cuenta */
+  businesses: MyBusiness[]
+  switchBusiness: (id: string) => Promise<void>
+  reloadBusinesses: () => Promise<void>
   createBusiness: (name: string, ownerName: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
 const Ctx = createContext<AuthValue | null>(null)
 
-async function loadMembership(user: User): Promise<Membership | null | 'offline'> {
-  const cacheKey = `membership:${user.id}`
+/** Todas las sedes/negocios de la cuenta (cache para usar sin internet) */
+async function loadMemberships(user: User): Promise<MyBusiness[] | 'offline'> {
+  const cacheKey = `memberships:${user.id}`
   if (navigator.onLine) {
     const { data, error } = await supabase
       .from(T.members)
-      .select('business_id, user_id, role')
+      .select('business_id, role, created_at, business:playtime_businesses(name, parent_id)')
       .eq('user_id', user.id)
       .order('created_at')
-      .limit(1)
-      .maybeSingle()
     if (!error) {
-      await setMeta(cacheKey, data ?? null)
-      return (data as Membership) ?? null
+      type Row = { business_id: string; role: Role; business: { name: string; parent_id: string | null } | null }
+      const list: MyBusiness[] = ((data ?? []) as unknown as Row[]).map((r) => ({
+        id: r.business_id,
+        role: r.role,
+        name: r.business?.name ?? 'Negocio',
+        parent_id: r.business?.parent_id ?? null,
+      }))
+      await setMeta(cacheKey, list)
+      return list
     }
   }
-  const cached = await getMeta<Membership | null>(cacheKey)
+  const cached = await getMeta<MyBusiness[]>(cacheKey)
   if (cached !== undefined) return cached
   return 'offline'
 }
@@ -48,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [membership, setMembership] = useState<Membership | null>(null)
   const [needsOnline, setNeedsOnline] = useState(false)
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
+  const [businesses, setBusinesses] = useState<MyBusiness[]>([])
 
   const business =
     useLiveQuery(() => (membership ? db.businesses.get(membership.business_id) : undefined), [membership?.business_id]) ??
@@ -57,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u)
     if (!u) {
       setMembership(null)
+      setBusinesses([])
       setIsPlatformAdmin(false)
       setLoading(false)
       return
@@ -67,13 +79,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!error) await setMeta(adminKey, data === true)
     }
     setIsPlatformAdmin((await getMeta<boolean>(adminKey)) === true)
-    const m = await loadMembership(u)
-    if (m === 'offline') {
+    const list = await loadMemberships(u)
+    if (list === 'offline') {
       setNeedsOnline(true)
       setMembership(null)
     } else {
       setNeedsOnline(false)
-      setMembership(m)
+      setBusinesses(list)
+      const saved = await getMeta<string>(`current:${u.id}`)
+      const pick = list.find((b) => b.id === saved) ?? list.find((b) => !b.parent_id) ?? list[0]
+      setMembership(pick ? { business_id: pick.id, user_id: u.id, role: pick.role } : null)
     }
     setLoading(false)
   }, [])
@@ -101,13 +116,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => stopSync()
   }, [membership])
 
+  const switchBusiness = async (id: string) => {
+    if (!user) return
+    const b = businesses.find((x) => x.id === id)
+    if (!b) return
+    await setMeta(`current:${user.id}`, id)
+    setMembership({ business_id: id, user_id: user.id, role: b.role })
+  }
+
+  const reloadBusinesses = async () => {
+    if (!user) return
+    const list = await loadMemberships(user)
+    if (list !== 'offline') setBusinesses(list)
+  }
+
   const createBusiness = async (name: string, ownerName: string) => {
     if (!user) throw new Error('Sesión no iniciada')
     const { data, error } = await supabase.rpc('playtime_create_business', { p_name: name, p_owner_name: ownerName })
     if (error) throw new Error(error.message)
-    const m: Membership = { business_id: data as string, user_id: user.id, role: 'owner' }
-    await setMeta(`membership:${user.id}`, m)
-    setMembership(m)
+    const id = data as string
+    const list: MyBusiness[] = [...businesses, { id, name, parent_id: null, role: 'owner' }]
+    setBusinesses(list)
+    await setMeta(`memberships:${user.id}`, list)
+    await setMeta(`current:${user.id}`, id)
+    setMembership({ business_id: id, user_id: user.id, role: 'owner' })
     await syncNow()
   }
 
@@ -126,7 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const canManage = membership?.role === 'owner' || membership?.role === 'admin'
 
   return (
-    <Ctx.Provider value={{ loading, user, membership, business, canManage, isPlatformAdmin, needsOnline, createBusiness, signOut }}>
+    <Ctx.Provider value={{ loading, user, membership, business, canManage, isPlatformAdmin, needsOnline, businesses, switchBusiness, reloadBusinesses, createBusiness, signOut }}>
       {children}
     </Ctx.Provider>
   )

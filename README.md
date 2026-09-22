@@ -42,6 +42,36 @@ Para agregar otra persona administradora:
 insert into public.playtime_platform_admins(email) values ('correo@ejemplo.com');
 ```
 
+## Planes, límites y extras
+
+Cada negocio principal tiene un plan SaaS con 4 límites:
+- entradas por mes;
+- cuentas;
+- dispositivos;
+- sedes.
+
+Sus sedes comparten ese plan. Los límites se editan en `/admin/planes`.
+
+**La app bloquea:**
+- **Entradas**: al llegar al límite del mes, el botón "Nueva entrada" se bloquea y aparecen las opciones (renovar, mejorar plan o comprar extra), con enlace a WhatsApp o correo.
+- **Plan vencido** (`plan_expires_at`): no se pueden registrar entradas nuevas. Los niños que ya están dentro siguen funcionando.
+- **Dispositivos**: cada tablet o celular se registra al iniciar sesión. Si no hay cupo, ese dispositivo queda bloqueado.
+- **Cuentas y sedes**: no se pueden agregar más.
+
+**El servidor también bloquea**, con triggers. En las entradas deja un margen de 10 para ventas hechas sin internet.
+
+**Extras**: el admin los agrega en el detalle del negocio, pestaña Extras. Se suman al límite y pueden durar hasta fin de mes, ser permanentes o vencer en una fecha.
+
+**Sedes**: el dueño crea sedes en Ajustes → Sedes y cambia de sede desde el encabezado. Cada sede nueva copia las tarifas y los dueños/administradores del principal.
+
+## Publicar en Vercel
+
+1. En vercel.com → **Add New → Project** → importa `Gvbustamante/lista-regalos`.
+2. Framework: **Vite**. Build: `npm run build`. Output: `dist`.
+3. Agrega las variables de entorno `VITE_SUPABASE_URL` y `VITE_SUPABASE_KEY`, con los valores de `.env.example`.
+4. En **Settings → Git → Production Branch**, pon la rama que quieras publicar (por ejemplo `claude/github-repositories-qpkz0w`, o `main` después de fusionar).
+5. En Supabase → Authentication → URL Configuration, agrega el dominio de Vercel en **Redirect URLs**.
+
 ## Stack
 
 React + TypeScript + Vite · Tailwind CSS v4 · Dexie (IndexedDB) · Supabase (Auth, Postgres, Realtime) · PWA · Capacitor
